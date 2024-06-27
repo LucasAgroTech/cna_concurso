@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>5º CONCURSO DE VÍDEOS EDUCATIVOS DO SENAR</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="mt-5">Formulário de Cadastro</h1>
+      <form action="/" method="POST" enctype="multipart/form-data" class="mt-4">
+        <div class="form-group">
+          <label for="nome">Nome:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="nome"
+            name="nome"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="cpf">CPF:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="cpf"
+            name="cpf"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="endereco">Endereço:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="endereco"
+            name="endereco"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="cep">CEP:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="cep"
+            name="cep"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="estado">Estado:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="estado"
+            name="estado"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="telefone">Telefone:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="telefone"
+            name="telefone"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="tema">Tema:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="tema"
+            name="tema"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="referencia_video">Referência de Vídeo:</label>
+          <select
+            class="form-control"
+            id="referencia_video"
+            name="referencia_video"
+          >
+            <option value="Formação Profissional Rural">
+              Formação Profissional Rural
+            </option>
+            <option value="Promoção Social">Promoção Social</option>
+            <option value="Assistência Técnica e Gerencial">
+              Assistência Técnica e Gerencial
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="formacao">Formação:</label>
+          <select class="form-control" id="formacao" name="formacao">
+            <option value="Sistema de Produção Agropecuário">
+              Sistema de Produção Agropecuário
+            </option>
+            <option value="Bem-estar Animal: as 5 liberdades dos animais">
+              Bem-estar Animal: as 5 liberdades dos animais
+            </option>
+            <option value="Meio Ambiente">Meio Ambiente</option>
+            <option value="Gestão Rural">Gestão Rural</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="promocao">Promoção:</label>
+          <select class="form-control" id="promocao" name="promocao">
+            <option value="Alimentação e Nutrição">
+              Alimentação e Nutrição
+            </option>
+            <option value="Inclusão Digital">Inclusão Digital</option>
+            <option value="Organização Comunitária">
+              Organização Comunitária
+            </option>
+            <option value="Saúde Preventiva">Saúde Preventiva</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="assistencia">Assistência:</label>
+          <select class="form-control" id="assistencia" name="assistencia">
+            <option value="Aumento da Produção Custos">
+              Aumento da Produção Custos
+            </option>
+            <option value="Geração de renda e redução de">
+              Geração de renda e redução de
+            </option>
+            <option value="Produzindo alimento com respeito ao meio ambiente">
+              Produzindo alimento com respeito ao meio ambiente
+            </option>
+            <option value="Qualidade de Vida">Qualidade de Vida</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="videoUpload">Upload de Vídeo:</label>
+          <input
+            type="file"
+            class="form-control-file"
+            id="videoUpload"
+            name="videoUpload"
+            accept="video/*"
+            required
+          />
+          <progress
+            id="uploadProgress"
+            value="0"
+            max="100"
+            style="width: 100%"
+          ></progress>
+        </div>
+        <div class="form-check">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="privacyPolicy"
+            name="privacyPolicy"
+            required
+          />
+          <label class="form-check-label" for="privacyPolicy"
+            >Eu aceito a política de privacidade</label
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enviar</button>
+      </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const referenciaVideo = document.getElementById("referencia_video");
+        const formacao = document
+          .getElementById("formacao")
+          .closest(".form-group");
+        const promocao = document
+          .getElementById("promocao")
+          .closest(".form-group");
+        const assistencia = document
+          .getElementById("assistencia")
+          .closest(".form-group");
+
+        // Função para esconder todos os campos
+        function hideAll() {
+          formacao.style.display = "none";
+          promocao.style.display = "none";
+          assistencia.style.display = "none";
+        }
+
+        // Função para mostrar o campo com base na seleção
+        function showField() {
+          const value = referenciaVideo.value;
+          hideAll();
+          if (value === "Formação Profissional Rural") {
+            formacao.style.display = "block";
+          } else if (value === "Promoção Social") {
+            promocao.style.display = "block";
+          } else if (value === "Assistência Técnica e Gerencial") {
+            assistencia.style.display = "block";
+          }
+        }
+
+        // Esconder todos os campos ao carregar
+        hideAll();
+
+        // Evento para detectar mudança no campo de referência de vídeo
+        referenciaVideo.addEventListener("change", showField);
+      });
+      document
+        .getElementById("videoUpload")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onloadstart = function (e) {
+            document.getElementById("uploadProgress").value = 0;
+          };
+          reader.onprogress = function (e) {
+            if (e.lengthComputable) {
+              const percentComplete = parseInt((e.loaded / e.total) * 100);
+              document.getElementById("uploadProgress").value = percentComplete;
+            }
+          };
+          reader.onloadend = function (e) {
+            document.getElementById("uploadProgress").value = 100;
+          };
+          reader.readAsDataURL(file); // Esta linha é apenas para simulação
+        });
+      document.querySelector("form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var form = this;
+        var formData = new FormData(form);
+
+        // Mostra um alerta de carregamento
+        Swal.fire({
+          title: "Enviando...",
+          text: "Por favor, aguarde enquanto o vídeo está sendo enviado.",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        fetch("/", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok"); // Gera um erro se a resposta não for ok
+            }
+            return response.json();
+          })
+          .then((data) => {
+            Swal.close(); // Fecha o alerta de carregamento
+            if (data.message === "File successfully uploaded") {
+              // Mostra um alerta de sucesso
+              Swal.fire(
+                "Sucesso!",
+                "Seu vídeo foi enviado com sucesso!",
+                "success"
+              ).then((result) => {
+                if (result.isConfirmed) {
+                  form.reset(); // Reseta o formulário
+                }
+              });
+            } else {
+              // Mostra um alerta de erro se a mensagem de sucesso não for retornada
+              Swal.fire(
+                "Erro!",
+                "Houve um erro ao enviar o vídeo. Tente novamente!",
+                "error"
+              );
+            }
+          })
+          .catch((error) => {
+            Swal.close(); // Fecha o alerta de carregamento
+            console.error("Error:", error);
+            // Mostra um alerta de erro em caso de falha na rede
+            Swal.fire(
+              "Erro!",
+              "Houve um problema com a rede ou o servidor. Tente novamente!",
+              "error"
+            );
+          });
+      });
+    </script>
+  </body>
+</html>
