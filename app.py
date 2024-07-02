@@ -7,9 +7,15 @@ import os
 
 app = Flask(__name__)
 
-# Configuração do banco de dados
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///local.db")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+uri = os.getenv(
+    "DATABASE_URL", "sqlite:///local.db"
+)  # Default to SQLite for local development
+if uri.startswith("postgres://"):
+    uri = uri.replace(
+        "postgres://", "postgresql://", 1
+    )  # Required for SQLAlchemy compatibility
+
+app.config["SQLALCHEMY_DATABASE_URI"] = uri
 
 
 cloudinary.config(
