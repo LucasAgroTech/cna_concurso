@@ -10,8 +10,44 @@
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/additional-methods.min.js"></script>
   </head>
   <body>
+    <script>
+      $(document).ready(function () {
+        // Aplicando máscaras
+        $("#cpf").mask("000.000.000-00", { reverse: true });
+        $("#cep").mask("00000-000");
+        $("#telefone").mask("(00) 00000-0000");
+
+        // Validação do formulário
+        $("form").validate({
+          rules: {
+            cpf: {
+              required: true,
+              cpfBR: true, // Validador de CPF para Brasil
+            },
+            telefone: {
+              required: true,
+              phoneBR: true, // Validador de telefone para Brasil
+            },
+          },
+          messages: {
+            cpf: {
+              required: "Por favor, insira seu CPF",
+              cpfBR: "Por favor, insira um CPF válido",
+            },
+            telefone: {
+              required: "Por favor, insira seu telefone",
+              phoneBR: "Por favor, insira um telefone válido",
+            },
+          },
+        });
+      });
+    </script>
     <div class="container">
       <h1 class="mt-5">Formulário de Cadastro</h1>
       <form action="/" method="POST" enctype="multipart/form-data" class="mt-4">
@@ -176,11 +212,6 @@
       </form>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const referenciaVideo = document.getElementById("referencia_video");
@@ -194,14 +225,12 @@
           .getElementById("assistencia")
           .closest(".form-group");
 
-        // Função para esconder todos os campos
         function hideAll() {
           formacao.style.display = "none";
           promocao.style.display = "none";
           assistencia.style.display = "none";
         }
 
-        // Função para mostrar o campo com base na seleção
         function showField() {
           const value = referenciaVideo.value;
           hideAll();
@@ -214,10 +243,8 @@
           }
         }
 
-        // Esconder todos os campos ao carregar
         hideAll();
 
-        // Evento para detectar mudança no campo de referência de vídeo
         referenciaVideo.addEventListener("change", showField);
       });
       document
@@ -239,14 +266,13 @@
           reader.onloadend = function (e) {
             document.getElementById("uploadProgress").value = 100;
           };
-          reader.readAsDataURL(file); // Esta linha é apenas para simulação
+          reader.readAsDataURL(file);
         });
       document.querySelector("form").addEventListener("submit", function (e) {
         e.preventDefault();
         var form = this;
         var formData = new FormData(form);
 
-        // Mostra um alerta de carregamento
         Swal.fire({
           title: "Enviando...",
           text: "Por favor, aguarde enquanto o vídeo está sendo enviado.",
@@ -260,38 +286,31 @@
           method: "POST",
           body: formData,
         })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok"); // Gera um erro se a resposta não for ok
-            }
-            return response.json();
-          })
+          .then((response) => response.json()) // Assegure-se de sempre processar a resposta como JSON.
           .then((data) => {
-            Swal.close(); // Fecha o alerta de carregamento
-            if (data.message === "File successfully uploaded") {
-              // Mostra um alerta de sucesso
+            Swal.close();
+            if (data.message === "Vídeo registrado com sucesso!") {
               Swal.fire(
                 "Sucesso!",
                 "Seu vídeo foi enviado com sucesso!",
                 "success"
               ).then((result) => {
                 if (result.isConfirmed) {
-                  form.reset(); // Reseta o formulário
+                  form.reset();
                 }
               });
             } else {
-              // Mostra um alerta de erro se a mensagem de sucesso não for retornada
               Swal.fire(
                 "Erro!",
-                "Houve um erro ao enviar o vídeo. Tente novamente!",
+                data.error ||
+                  "Houve um erro ao enviar o vídeo. Tente novamente!",
                 "error"
               );
             }
           })
           .catch((error) => {
-            Swal.close(); // Fecha o alerta de carregamento
+            Swal.close();
             console.error("Error:", error);
-            // Mostra um alerta de erro em caso de falha na rede
             Swal.fire(
               "Erro!",
               "Houve um problema com a rede ou o servidor. Tente novamente!",

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Confirmação de Envio</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Confirmar Dados</h1>
+      <p>Por favor, confirme se os dados abaixo estão corretos:</p>
+      <ul>
+        <li>Nome: {{ nome }}</li>
+        <li>CPF: {{ cpf }}</li>
+        <!-- Adicione mais campos conforme necessário -->
+      </ul>
+
+      <form action="{{ url_for('finalize') }}" method="post">
+        <div class="form-group">
+          <input type="checkbox" id="confirm" name="confirm" required />
+          <label for="confirm"
+            >Confirmo que os dados estão corretos e autorizo o uso da minha
+            imagem.</label
+          >
+        </div>
+        <button type="submit" class="btn btn-primary">
+          Confirmar e Enviar
+        </button>
+      </form>
+    </div>
+  </body>
+</html>

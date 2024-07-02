@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify, redirect, url_for, render_template
+from flask import Flask, request, jsonify, redirect, url_for, render_template, session
 from werkzeug.utils import secure_filename
+from sqlalchemy.exc import IntegrityError
 import cloudinary.uploader
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -45,51 +46,55 @@ with app.app_context():
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        video_file = request.files["videoUpload"]
-        if video_file:
-            filename = secure_filename(video_file.filename)
-            upload_result = cloudinary.uploader.upload(
-                video_file, resource_type="video"
-            )
-            video_url = upload_result["url"]
-
-            # Instância para salvar no banco de dados
-            new_entry = FormEntry(
-                nome=request.form.get("nome"),
-                cpf=request.form.get("cpf"),
-                endereco=request.form.get("endereco"),
-                cep=request.form.get("cep"),
-                estado=request.form.get("estado"),
-                telefone=request.form.get("telefone"),
-                tema=request.form.get("tema"),
-                referencia_video=request.form.get("referencia_video"),
-                formacao=request.form.get("formacao"),
-                promocao=request.form.get("promocao"),
-                assistencia=request.form.get("assistencia"),
-                link_arquivo=video_url,
-            )
-
-            db.session.add(new_entry)
-            db.session.commit()
-
-            return (
-                jsonify(
-                    {
-                        "message": "Vídeo registrado com sucesso!",
-                        "video_url": video_url,
-                    }
-                ),
-                200,
-            )
-        else:
-            return jsonify({"error": "Vídeo não anexado!"}), 400
+        session["form_data"] = request.form.to_dict()
+        session["video_file"] = request.files["videoUpload"]
+        return redirect(url_for("termo_aceite"))
 
     return render_template("form.html")
 
 
+@app.route("/termo_aceite", methods=["GET", "POST"])
+def termo_aceite():
+    if request.method == "POST":
+        if "aceito" in request.form:
+            try:
+                video_file = session["video_file"]
+                upload_result = cloudinary.uploader.upload(
+                    video_file, resource_type="video"
+                )
+                video_url = upload_result["url"]
+
+                new_entry = FormEntry(**session["form_data"], link_arquivo=video_url)
+                db.session.add(new_entry)
+                db.session.commit()
+
+                # Limpar a sessão após o uso
+                session.pop("form_data", None)
+                session.pop("video_file", None)
+
+                return (
+                    jsonify(
+                        {
+                            "message": "Vídeo registrado com sucesso!",
+                            "video_url": video_url,
+                        }
+                    ),
+                    200,
+                )
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+        else:
+            return render_template(
+                "termo_aceite.html", error="Você deve aceitar os termos para continuar."
+            )
+
+    form_data = session.get("form_data", {})
+    return render_template("termo_aceite.html", form_data=form_data)
+
+
 @app.route("/entries")
 def view_entries():
-    entries = FormEntry.query.all()  # Pega todos os registros do banco de dados
+    entries = FormEntry.query.all()
     return render_template("entries.html", entries=entries)
 
 
