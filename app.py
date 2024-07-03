@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify, render_template
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
+import pytz
 import cloudinary.uploader
 import os
 
@@ -60,8 +61,9 @@ def index():
                     folder='video_uploads'
                 )
                 link_video = upload_result.get('url')
-                
-                bsb_time = datetime.now(timezone(timedelta(hours=-3)))
+
+                timezone_bsb = pytz.timezone('America/Sao_Paulo')
+                bsb_time = datetime.now(timezone_bsb)
 
                 # Salvando no banco de dados
                 new_entry = FormEntry(
