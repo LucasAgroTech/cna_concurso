@@ -15,34 +15,24 @@
       <table class="table">
         <thead>
           <tr>
+            <th>Data</th>
             <th>Nome</th>
-            <th>CPF</th>
-            <th>Endereço</th>
-            <th>CEP</th>
             <th>Estado</th>
             <th>Telefone</th>
             <th>Tema</th>
             <th>Referência Vídeo</th>
-            <th>Formação</th>
-            <th>Promoção</th>
-            <th>Assistência</th>
             <th>Link do Arquivo</th>
           </tr>
         </thead>
         <tbody>
           {% for entry in entries %}
           <tr>
+            <td>{{ entry.data_envio }}</td>
             <td>{{ entry.nome }}</td>
-            <td>{{ entry.cpf }}</td>
-            <td>{{ entry.endereco }}</td>
-            <td>{{ entry.cep }}</td>
             <td>{{ entry.estado }}</td>
             <td>{{ entry.telefone }}</td>
             <td>{{ entry.tema }}</td>
             <td>{{ entry.referencia_video }}</td>
-            <td>{{ entry.formacao }}</td>
-            <td>{{ entry.promocao }}</td>
-            <td>{{ entry.assistencia }}</td>
             <td>
               <a href="{{ entry.link_arquivo }}" target="_blank">Ver Vídeo</a>
             </td>

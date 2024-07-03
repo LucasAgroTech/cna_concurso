@@ -14,6 +14,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/additional-methods.min.js"></script>
+    <style>
+
+      .form-control-file {
+          border: 1px solid #dee2e6;
+          border-radius: 5px;
+          padding: 10px;
+      }
+
+      .btn-primary {
+            background-color: #007bff; /* Cor de fundo */
+            border-color: #007bff; /* Cor da borda */
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4); /* Sombra para um efeito 3D leve */
+            transition: all 0.3s ease-in-out; /* Transição suave para efeitos de hover e foco */
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #0056b3; /* Cor de fundo mais escura no hover */
+            border-color: #004085; /* Cor da borda mais escura no hover */
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.6); /* Sombra mais pronunciada no hover */
+        }
+
+        .btn-primary:active {
+            background-color: #004085; /* Cor de fundo quando o botão é clicado */
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4) inset; /* Sombra interna para efeito de pressionado */
+        }
+  </style>
   </head>
   <body>
     <script>
@@ -28,11 +56,11 @@
           rules: {
             cpf: {
               required: true,
-              cpfBR: true, // Validador de CPF para Brasil
+              cpfBR: true,
             },
             telefone: {
               required: true,
-              phoneBR: true, // Validador de telefone para Brasil
+              phoneBR: true,
             },
           },
           messages: {
@@ -46,88 +74,104 @@
             },
           },
         });
+              
+                fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados")
+          .then(response => response.json())
+          .then(data => {
+            const estadoSelect = document.getElementById("estado");
+            data.forEach(estado => {
+              const option = document.createElement("option");
+              option.value = estado.sigla;
+              option.textContent = estado.nome;
+              estadoSelect.appendChild(option);
+            });
+          })
+          .catch(error => console.error("Erro ao carregar estados:", error));
       });
     </script>
     <div class="container">
       <h1 class="mt-5">Formulário de Cadastro</h1>
       <form action="/" method="POST" enctype="multipart/form-data" class="mt-4">
         <div class="form-group">
-          <label for="nome">Nome:</label>
           <input
             type="text"
             class="form-control"
             id="nome"
             name="nome"
+            placeholder="Nome"
             required
           />
         </div>
         <div class="form-group">
-          <label for="cpf">CPF:</label>
           <input
             type="text"
             class="form-control"
             id="cpf"
             name="cpf"
+            placeholder="CPF"
             required
           />
         </div>
         <div class="form-group">
-          <label for="endereco">Endereço:</label>
           <input
             type="text"
             class="form-control"
             id="endereco"
             name="endereco"
+            placeholder="Endereço"
             required
           />
         </div>
         <div class="form-group">
-          <label for="cep">CEP:</label>
           <input
             type="text"
             class="form-control"
             id="cep"
             name="cep"
+            placeholder="CEP"
             required
           />
         </div>
         <div class="form-group">
-          <label for="estado">Estado:</label>
-          <input
-            type="text"
+          <select
             class="form-control"
             id="estado"
             name="estado"
+            placeholder="Estado"
             required
-          />
+          >
+            <option value="" disabled selected>Selecione um estado</option>
+          </select>
         </div>
         <div class="form-group">
-          <label for="telefone">Telefone:</label>
           <input
             type="text"
             class="form-control"
             id="telefone"
             name="telefone"
+            placeholder="Telefone"
             required
           />
         </div>
         <div class="form-group">
-          <label for="tema">Tema:</label>
           <input
             type="text"
             class="form-control"
             id="tema"
             name="tema"
+            placeholder="Tema"
             required
           />
         </div>
         <div class="form-group">
-          <label for="referencia_video">Referência de Vídeo:</label>
           <select
             class="form-control"
             id="referencia_video"
             name="referencia_video"
           >
+            <option value="">
+              Selecione uma referência de vídeo...
+            </option>
             <option value="Formação Profissional Rural">
               Formação Profissional Rural
             </option>
@@ -138,8 +182,10 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="formacao">Formação:</label>
           <select class="form-control" id="formacao" name="formacao">
+            <option value="">
+              Selecione uma formação...
+            </option>
             <option value="Sistema de Produção Agropecuário">
               Sistema de Produção Agropecuário
             </option>
@@ -151,8 +197,10 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="promocao">Promoção:</label>
           <select class="form-control" id="promocao" name="promocao">
+            <option value="">
+              Selecione uma promoção...
+            </option>
             <option value="Alimentação e Nutrição">
               Alimentação e Nutrição
             </option>
@@ -164,8 +212,10 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="assistencia">Assistência:</label>
           <select class="form-control" id="assistencia" name="assistencia">
+            <option value="">
+              Selecione uma assistência...
+            </option>
             <option value="Aumento da Produção Custos">
               Aumento da Produção Custos
             </option>
@@ -179,21 +229,14 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="videoUpload">Upload de Vídeo:</label>
           <input
-            type="file"
-            class="form-control-file"
-            id="videoUpload"
-            name="videoUpload"
-            accept="video/*"
-            required
+              type="file"
+              class="form-control-file"
+              id="videoUpload"
+              name="videoUpload"
+              accept="video/*"
+              required
           />
-          <progress
-            id="uploadProgress"
-            value="0"
-            max="100"
-            style="width: 100%"
-          ></progress>
         </div>
         <div class="form-check">
           <input
