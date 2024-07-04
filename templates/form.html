@@ -14,34 +14,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/additional-methods.min.js"></script>
-    <style>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
+    <style>
       .form-control-file {
-          border: 1px solid #dee2e6;
-          border-radius: 5px;
-          padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
       }
 
       .btn-primary {
-            background-color: #007bff; /* Cor de fundo */
-            border-color: #007bff; /* Cor da borda */
-            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4); /* Sombra para um efeito 3D leve */
-            transition: all 0.3s ease-in-out; /* Transição suave para efeitos de hover e foco */
-            width: 100%;
-            margin-top: 1rem;
-        }
+        background-color: #007bff; /* Cor de fundo */
+        border-color: #007bff; /* Cor da borda */
+        box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4); /* Sombra para um efeito 3D leve */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos de hover e foco */
+        width: 100%;
+        margin-top: 1rem;
+      }
 
-        .btn-primary:hover, .btn-primary:focus {
-            background-color: #0056b3; /* Cor de fundo mais escura no hover */
-            border-color: #004085; /* Cor da borda mais escura no hover */
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.6); /* Sombra mais pronunciada no hover */
-        }
+      .btn-primary:hover,
+      .btn-primary:focus {
+        background-color: #0056b3; /* Cor de fundo mais escura no hover */
+        border-color: #004085; /* Cor da borda mais escura no hover */
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.6); /* Sombra mais pronunciada no hover */
+      }
 
-        .btn-primary:active {
-            background-color: #004085; /* Cor de fundo quando o botão é clicado */
-            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4) inset; /* Sombra interna para efeito de pressionado */
-        }
-  </style>
+      .btn-primary:active {
+        background-color: #004085; /* Cor de fundo quando o botão é clicado */
+        box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4) inset; /* Sombra interna para efeito de pressionado */
+      }
+    </style>
   </head>
   <body>
     <script>
@@ -74,19 +76,19 @@
             },
           },
         });
-              
-                fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados")
-          .then(response => response.json())
-          .then(data => {
+
+        fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados")
+          .then((response) => response.json())
+          .then((data) => {
             const estadoSelect = document.getElementById("estado");
-            data.forEach(estado => {
+            data.forEach((estado) => {
               const option = document.createElement("option");
               option.value = estado.sigla;
               option.textContent = estado.nome;
               estadoSelect.appendChild(option);
             });
           })
-          .catch(error => console.error("Erro ao carregar estados:", error));
+          .catch((error) => console.error("Erro ao carregar estados:", error));
       });
     </script>
     <div class="container">
@@ -169,9 +171,7 @@
             id="referencia_video"
             name="referencia_video"
           >
-            <option value="">
-              Selecione uma referência de vídeo...
-            </option>
+            <option value="">Selecione uma referência de vídeo...</option>
             <option value="Formação Profissional Rural">
               Formação Profissional Rural
             </option>
@@ -183,9 +183,7 @@
         </div>
         <div class="form-group">
           <select class="form-control" id="formacao" name="formacao">
-            <option value="">
-              Selecione uma formação...
-            </option>
+            <option value="">Selecione uma formação...</option>
             <option value="Sistema de Produção Agropecuário">
               Sistema de Produção Agropecuário
             </option>
@@ -198,9 +196,7 @@
         </div>
         <div class="form-group">
           <select class="form-control" id="promocao" name="promocao">
-            <option value="">
-              Selecione uma promoção...
-            </option>
+            <option value="">Selecione uma promoção...</option>
             <option value="Alimentação e Nutrição">
               Alimentação e Nutrição
             </option>
@@ -213,9 +209,7 @@
         </div>
         <div class="form-group">
           <select class="form-control" id="assistencia" name="assistencia">
-            <option value="">
-              Selecione uma assistência...
-            </option>
+            <option value="">Selecione uma assistência...</option>
             <option value="Aumento da Produção Custos">
               Aumento da Produção Custos
             </option>
@@ -230,29 +224,94 @@
         </div>
         <div class="form-group">
           <input
-              type="file"
-              class="form-control-file"
-              id="videoUpload"
-              name="videoUpload"
-              accept="video/*"
-              required
+            type="file"
+            class="form-control-file"
+            id="videoUpload"
+            name="videoUpload"
+            accept="video/*"
+            required
           />
         </div>
         <div class="form-check">
           <input
             type="checkbox"
             class="form-check-input"
-            id="privacyPolicy"
-            name="privacyPolicy"
+            id="acceptTerms"
+            name="acceptTerms"
             required
           />
-          <label class="form-check-label" for="privacyPolicy"
-            >Eu aceito a política de privacidade</label
+          <label class="form-check-label" for="acceptTerms"
+            >Eu aceito o
+            <a href="javascript:void(0)" id="link-termo-de-uso"
+              >termo de uso e autorizo o uso de imagem, nome e voz</a
+            ></label
           >
         </div>
-
         <button type="submit" class="btn btn-primary">Enviar</button>
       </form>
+    </div>
+
+    <!-- Modal Termo de Uso -->
+    <div id="termo-de-uso-modal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              Termo de Autorização de Uso de Nome, Imagem e Voz
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+              Eu, ________________, CPF nº ________________, neste ato, e para
+              todos os fins em direito admitidos, AUTORIZO expressamente a
+              utilização do meu nome, imagem e voz, em caráter definitivo e
+              gratuito.
+            </p>
+            <p>
+              Meu nome, imagem e voz poderão ser exibidos, em apresentações
+              audiovisuais, em publicações e divulgações de modo geral,
+              inclusive por meio da rede mundial de computadores, em sítios do
+              Serviço Nacional de Aprendizagem Rural – Senar e da Confederação
+              da Agricultura e Pecuária do Brasil – CNA.
+            </p>
+            <p>
+              O Serviço Nacional de Aprendizagem Rural – Senar fica autorizado a
+              executar a edição e montagem das fotos e filmagens, conduzindo as
+              reproduções que entender necessárias, bem como a produzir os
+              respectivos materiais de comunicação, respeitando sempre os fins
+              aqui estipulados.
+            </p>
+            <p>
+              Por ser esta a expressão de minha vontade, nada terei a reclamar a
+              título de direitos conexos ao meu nome, imagem e voz ou qualquer
+              outro.
+            </p>
+            <p>Data, local</p>
+            <p>Assinatura:</p>
+            <p>
+              Observação: caso apareça no vídeo outras pessoas, os mesmos
+              deverão assinar o termo.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -289,6 +348,25 @@
         hideAll();
 
         referenciaVideo.addEventListener("change", showField);
+
+        // Abrir e fechar modal
+        var modal = document.getElementById("termo-de-uso-modal");
+        var linkTermo = document.getElementById("link-termo-de-uso");
+        var span = document.getElementsByClassName("close")[0];
+
+        linkTermo.onclick = function () {
+          $(modal).modal("show");
+        };
+
+        span.onclick = function () {
+          $(modal).modal("hide");
+        };
+
+        window.onclick = function (event) {
+          if (event.target == modal) {
+            $(modal).modal("hide");
+          }
+        };
       });
       document
         .getElementById("videoUpload")
