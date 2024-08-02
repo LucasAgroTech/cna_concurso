@@ -33,6 +33,7 @@ class FormEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     cpf = db.Column(db.String(32), nullable=False, unique=True)
+    email = db.Column(db.String(100), nullable=False, unique=True)
     endereco = db.Column(db.String(200), nullable=False)
     cep = db.Column(db.String(32), nullable=False)
     estado = db.Column(db.String(32), nullable=False)
@@ -55,14 +56,18 @@ with app.app_context():
 def index():
     if request.method == "POST":
         form_data = request.form.to_dict()
-        telefone = request.form["telefone"]
-        nome = request.form["nome"]
+        cpf = form_data.get("cpf")
+        email = form_data.get("email")
 
-        # Upload de vídeo
+        # Verificação de CPF e email existentes
+        if FormEntry.query.filter_by(cpf=cpf).first():
+            return jsonify({"error": "CPF já cadastrado."}), 409
+        if FormEntry.query.filter_by(email=email).first():
+            return jsonify({"error": "E-mail já cadastrado."}), 409
+
         video_file = request.files.get("videoUpload")
         if video_file:
             try:
-                # Upload to Cloudinary
                 upload_result = cloudinary.uploader.upload(
                     video_file, resource_type="video", folder="video_uploads"
                 )
@@ -71,29 +76,25 @@ def index():
                 timezone_bsb = pytz.timezone("America/Sao_Paulo")
                 bsb_time = datetime.now(timezone_bsb)
 
-                # Salvando no banco de dados
                 new_entry = FormEntry(
                     nome=form_data.get("nome"),
                     cpf=form_data.get("cpf"),
+                    email=form_data.get("email"),
                     endereco=form_data.get("endereco"),
                     cep=form_data.get("cep"),
                     estado=form_data.get("estado"),
                     telefone=form_data.get("telefone"),
                     tema=form_data.get("tema"),
                     referencia_video=form_data.get("referencia_video"),
-                    promocao=form_data.get("promocao"),
                     formacao=form_data.get("formacao"),
+                    promocao=form_data.get("promocao"),
                     assistencia=form_data.get("assistencia"),
-                    aceite_termos=form_data.get("acceptTerms"),
                     link_arquivo=link_video,
+                    aceite_termos=form_data.get("aceite_termos", "Não"),
                     data_envio=bsb_time,
                 )
                 db.session.add(new_entry)
                 db.session.commit()
-
-                mensagem = f"""Olá {nome},\n\n🎉 Parabéns pela inscrição no *5º CONCURSO DE VÍDEOS EDUCATIVOS DO SENAR*! Seu vídeo foi enviado com sucesso. Uma cópia dos detalhes foi enviada para seu email.\n\n🚫 Para dúvidas, ligue para: (61) 2109-1400.\n\nAtenciosamente,\nEquipe do 5º Concurso de Vídeos Educativos do SENAR."""
-                enviar_whatsapp(mensagem, telefone)
-
                 return jsonify(
                     {
                         "message": "Vídeo registrado com sucesso!",
@@ -104,7 +105,6 @@ def index():
                 return jsonify({"error": str(e)}), 500
         else:
             return jsonify({"error": "Arquivo de vídeo é obrigatório."}), 400
-
     return render_template("form.html")
 
 
