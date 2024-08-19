@@ -24,28 +24,132 @@
       .form-control-file {
         border: 1px solid #dee2e6;
         border-radius: 5px;
-        padding: 10px;
+      }
+
+      .form-wrapper {
+        width: 40%;
+        max-width: 40%;
+        margin: 0 auto;
+        box-shadow: none;
+        border-radius: 20px;
+        background-color: #f1f3f4;
+      }
+      .form-group {
+        width: 100%;
+        padding-left: 2rem;
+        padding-right: 2rem;
+      }
+      .form-check {
+        width: 100%;
+        padding-left: 3.5rem;
+      }
+      .btn-upload-video,
+      .btn-upload-pdf {
+        border: none;
+        color: white;
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+        width: 100%;
+        border-radius: 0.25rem;
+        transition: all 0.2s ease-in-out;
+      }
+
+      h2 {
+        margin-top: 2rem;
+      }
+
+      .btn-upload-video {
+        background-color: #28a745; /* Verde */
+      }
+
+      .btn-upload-video:hover,
+      .btn-upload-video:focus {
+        background-color: #218838;
+        transform: scale(1.05);
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 2rem 0px;
+          font-size: 14px;
+        }
+        .form-wrapper {
+          width: 100%;
+          max-width: 90%;
+          margin: 0 auto;
+          padding: 0;
+          box-shadow: none;
+          border-radius: 20px;
+        }
+        .form-group {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+        .form-check {
+          width: 100%;
+          padding-left: 2.5rem;
+          padding-right: 2rem;
+        }
+        h2 {
+          font-size: 20px;
+          margin-left: 5px;
+          margin-top: 1rem;
+        }
+        h4 {
+          font-size: 16px;
+          margin-left: 5px;
+        }
+        .pheader {
+          margin-left: 5px;
+        }
+      }
+      .btn-upload-pdf {
+        background-color: #17a2b8; /* Azul-ciano */
+      }
+
+      .btn-upload-pdf:hover,
+      .btn-upload-pdf:focus {
+        background-color: #138496;
+        transform: scale(1.05);
+      }
+
+      .logo-container img {
+        width: 100%;
+        margin-bottom: 0;
+        border-radius: 20px 20px 0 0;
+      }
+
+      body {
+        padding: 2rem 0px;
+        font-size: 14px;
+      }
+
+      .form-group input[type="text"],
+      .form-group input[type="url"],
+      .form-group select,
+      .form-group textarea {
+        max-width: 100%; /* Garante que os elementos de formulário não excedam a largura da tela */
+        box-sizing: border-box; /* Inclui padding e bordas na largura total */
       }
 
       .btn-primary {
-        background-color: #007bff; /* Cor de fundo */
-        border-color: #007bff; /* Cor da borda */
-        box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4); /* Sombra para um efeito 3D leve */
-        transition: all 0.3s ease-in-out; /* Transição suave para efeitos de hover e foco */
+        background-color: #28a745; /* Verde para chamativo */
+        border-color: #218838;
+        box-shadow: 0 3px 6px rgba(0, 200, 0, 0.4); /* Sombra com tom verde para efeito 3D */
         width: 100%;
         margin-top: 1rem;
+        transition: all 0.3s ease-in-out;
       }
 
       .btn-primary:hover,
       .btn-primary:focus {
-        background-color: #0056b3; /* Cor de fundo mais escura no hover */
-        border-color: #004085; /* Cor da borda mais escura no hover */
-        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.6); /* Sombra mais pronunciada no hover */
+        background-color: #1e7e34;
+        border-color: #1a682c;
+        box-shadow: 0 5px 10px rgba(0, 150, 0, 0.6);
       }
 
       .btn-primary:active {
-        background-color: #004085; /* Cor de fundo quando o botão é clicado */
-        box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4) inset; /* Sombra interna para efeito de pressionado */
+        background-color: #19692c; /* Mais escuro quando clicado */
+        box-shadow: 0 2px 5px rgba(0, 150, 0, 0.4) inset; /* Sombra interna para efeito pressionado */
       }
     </style>
   </head>
@@ -95,8 +199,20 @@
           .catch((error) => console.error("Erro ao carregar estados:", error));
       });
     </script>
-    <div class="container">
-      <h1 class="mt-5">Formulário de Cadastro</h1>
+    <div class="form-wrapper">
+      <div class="logo-container">
+        <img src="static/logo.png" alt="Logo Esquerda" class="logo-left" />
+      </div>
+      <div class="form-group">
+        <h2>5º CONCURSO DE VÍDEOS EDUCATIVOS DO SENAR</h2>
+        <p class="pheader">
+          Agregar valor à cultura organizacional do Sistema CNA/SENAR/ICNA,
+          transformando ideias em resultados.
+        </p>
+        <div class="title-block" style="margin-top: 2rem">
+          <h4><i class="fas fa-user"></i> Informações do Participante</h4>
+        </div>
+      </div>
       <form action="/" method="POST" enctype="multipart/form-data" class="mt-4">
         <div class="form-group">
           <input
@@ -237,7 +353,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="btn btn-primary">
+          <label class="btn btn-upload-video">
             <i class="fas fa-upload"></i> Carregar Vídeo
             <span
               id="file-name"
@@ -249,6 +365,24 @@
               id="videoUpload"
               name="videoUpload"
               accept="video/*"
+              required
+              hidden
+            />
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="btn btn-upload-pdf">
+            <i class="fas fa-file-pdf"></i> Termo de Imagem (PDF)
+            <span
+              id="pdf-file-name"
+              style="display: block; font-size: 0.8em; font-weight: 300"
+            ></span>
+            <input
+              type="file"
+              class="form-control-file"
+              id="pdfUpload"
+              name="pdfUpload"
+              accept="application/pdf"
               required
               hidden
             />
@@ -270,7 +404,9 @@
             ></label
           >
         </div>
-        <button type="submit" class="btn btn-primary">Enviar</button>
+        <div class="form-group" style="padding-bottom: 2rem">
+          <button type="submit" class="btn btn-primary">Enviar</button>
+        </div>
       </form>
     </div>
 
@@ -392,6 +528,21 @@
         };
       });
       document
+        .getElementById("pdfUpload")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          if (!file) {
+            document.getElementById("pdf-file-name").textContent = "";
+            return;
+          }
+          const fileName = file.name;
+          const truncatedFileName =
+            fileName.length > 20 ? fileName.substring(0, 17) + "..." : fileName;
+          document.getElementById("pdf-file-name").textContent =
+            truncatedFileName;
+        });
+
+      document
         .getElementById("videoUpload")
         .addEventListener("change", function (event) {
           const file = event.target.files[0];
@@ -419,54 +570,73 @@
           reader.readAsDataURL(file);
         });
       document.querySelector("form").addEventListener("submit", function (e) {
-        e.preventDefault();
+        e.preventDefault(); // Impede o envio do formulário
         var form = this;
         var formData = new FormData(form);
 
-        Swal.fire({
-          title: "Enviando...",
-          text: "Por favor, aguarde enquanto o vídeo está sendo enviado.",
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
+        // Verificar se todos os campos requeridos estão preenchidos
+        var allFilled = true;
+        form.querySelectorAll("[required]").forEach(function (element) {
+          if (!element.value) {
+            allFilled = false;
+          }
         });
 
-        fetch("/", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.json()) // Assegure-se de sempre processar a resposta como JSON.
-          .then((data) => {
-            Swal.close();
-            if (data.message === "Vídeo registrado com sucesso!") {
-              Swal.fire(
-                "Sucesso!",
-                "Seu vídeo foi enviado com sucesso!",
-                "success"
-              ).then((result) => {
-                if (result.isConfirmed) {
-                  form.reset();
-                }
-              });
-            } else {
+        if (!allFilled) {
+          Swal.fire({
+            icon: "error",
+            title: "Erro ao enviar",
+            text: "Por favor, preencha todos os campos obrigatórios.",
+            confirmButtonColor: "#dc3545",
+            confirmButtonText: "OK",
+          });
+        } else {
+          // Processo de envio do formulário se todos os campos estiverem preenchidos
+          Swal.fire({
+            title: "Enviando...",
+            text: "Por favor, aguarde enquanto os dados estão sendo enviados.",
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+          });
+
+          fetch("/", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              Swal.close();
+              if (data.message) {
+                Swal.fire(
+                  "Sucesso!",
+                  data.message, // Mostra a mensagem de sucesso do servidor
+                  "success"
+                ).then((result) => {
+                  if (result.isConfirmed) {
+                    form.reset(); // Reseta o formulário após sucesso
+                  }
+                });
+              } else {
+                Swal.fire(
+                  "Erro!",
+                  data.error ||
+                    "Houve um erro ao enviar o formulário. Tente novamente!",
+                  "error"
+                );
+              }
+            })
+            .catch((error) => {
+              Swal.close();
+              console.error("Error:", error);
               Swal.fire(
                 "Erro!",
-                data.error ||
-                  "Houve um erro ao enviar o vídeo. Tente novamente!",
+                "Houve um problema com a rede ou o servidor. Tente novamente!",
                 "error"
               );
-            }
-          })
-          .catch((error) => {
-            Swal.close();
-            console.error("Error:", error);
-            Swal.fire(
-              "Erro!",
-              "Houve um problema com a rede ou o servidor. Tente novamente!",
-              "error"
-            );
-          });
+            });
+        }
       });
     </script>
   </body>

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -12,7 +13,7 @@ import io
 
 app = Flask(__name__)
 app.secret_key = "uma_chave_secreta_muito_segura"
-app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024 * 1024  # 1 GB
+app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024 * 1024
 
 uri = os.getenv("DATABASE_URL", "sqlite:///local.db")
 if uri.startswith("postgres://"):
@@ -26,14 +27,24 @@ cloudinary.config(
     api_secret="PJPwG2x4O2GnsgxVmjfQg8ppJx4",
 )
 
+# Configurações do Flask-Mail
+app.config["MAIL_SERVER"] = "smtp.hostinger.com"
+app.config["MAIL_PORT"] = 465
+app.config["MAIL_USE_TLS"] = False
+app.config["MAIL_USE_SSL"] = True
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
+mail = Mail(app)
+
 db = SQLAlchemy(app)
 
 
 class FormEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
-    cpf = db.Column(db.String(32), nullable=False, unique=True)
-    email = db.Column(db.String(100), nullable=False, unique=True)
+    cpf = db.Column(db.String(32), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
     endereco = db.Column(db.String(200), nullable=False)
     cep = db.Column(db.String(32), nullable=False)
     estado = db.Column(db.String(32), nullable=False)
@@ -44,6 +55,7 @@ class FormEntry(db.Model):
     promocao = db.Column(db.String(100), nullable=True)
     assistencia = db.Column(db.String(100), nullable=True)
     link_arquivo = db.Column(db.String(200), nullable=True)
+    link_pdf = db.Column(db.String(200), nullable=False)
     aceite_termos = db.Column(db.String(200), nullable=True)
     data_envio = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
@@ -56,56 +68,88 @@ with app.app_context():
 def index():
     if request.method == "POST":
         form_data = request.form.to_dict()
-        cpf = form_data.get("cpf")
-        email = form_data.get("email")
-
-        # Verificação de CPF e email existentes
-        if FormEntry.query.filter_by(cpf=cpf).first():
-            return jsonify({"error": "CPF já cadastrado."}), 409
-        if FormEntry.query.filter_by(email=email).first():
-            return jsonify({"error": "E-mail já cadastrado."}), 409
 
         video_file = request.files.get("videoUpload")
-        if video_file:
-            try:
-                upload_result = cloudinary.uploader.upload(
-                    video_file, resource_type="video", folder="video_uploads"
-                )
-                link_video = upload_result.get("url")
+        pdf_file = request.files.get("pdfUpload")
+        email = request.form["email"]
+        responsavel = request.form["nome"]
 
-                timezone_bsb = pytz.timezone("America/Sao_Paulo")
-                bsb_time = datetime.now(timezone_bsb)
-
-                new_entry = FormEntry(
-                    nome=form_data.get("nome"),
-                    cpf=form_data.get("cpf"),
-                    email=form_data.get("email"),
-                    endereco=form_data.get("endereco"),
-                    cep=form_data.get("cep"),
-                    estado=form_data.get("estado"),
-                    telefone=form_data.get("telefone"),
-                    tema=form_data.get("tema"),
-                    referencia_video=form_data.get("referencia_video"),
-                    formacao=form_data.get("formacao"),
-                    promocao=form_data.get("promocao"),
-                    assistencia=form_data.get("assistencia"),
-                    link_arquivo=link_video,
-                    aceite_termos=form_data.get("aceite_termos", "Não"),
-                    data_envio=bsb_time,
-                )
-                db.session.add(new_entry)
-                db.session.commit()
-                return jsonify(
-                    {
-                        "message": "Vídeo registrado com sucesso!",
-                        "link_arquivo": link_video,
-                    }
-                )
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-        else:
+        if not video_file:
             return jsonify({"error": "Arquivo de vídeo é obrigatório."}), 400
+
+        if not pdf_file or not pdf_file.filename.lower().endswith(".pdf"):
+            return (
+                jsonify(
+                    {"error": "Arquivo PDF é obrigatório e deve estar no formato PDF."}
+                ),
+                400,
+            )
+
+        try:
+            upload_result_video = cloudinary.uploader.upload(
+                video_file, resource_type="video", folder="video_uploads"
+            )
+            link_video = upload_result_video.get("url")
+
+            upload_result_pdf = cloudinary.uploader.upload(
+                pdf_file, resource_type="raw", folder="pdf_uploads"
+            )
+            link_pdf = upload_result_pdf.get("url")
+
+            timezone_bsb = pytz.timezone("America/Sao_Paulo")
+            bsb_time = datetime.now(timezone_bsb)
+
+            new_entry = FormEntry(
+                nome=form_data.get("nome"),
+                cpf=form_data.get("cpf"),
+                email=form_data.get("email"),
+                endereco=form_data.get("endereco"),
+                cep=form_data.get("cep"),
+                estado=form_data.get("estado"),
+                telefone=form_data.get("telefone"),
+                tema=form_data.get("tema"),
+                referencia_video=form_data.get("referencia_video"),
+                formacao=form_data.get("formacao"),
+                promocao=form_data.get("promocao"),
+                assistencia=form_data.get("assistencia"),
+                link_arquivo=link_video,
+                link_pdf=link_pdf,
+                aceite_termos=form_data.get("aceite_termos", "Não"),
+                data_envio=bsb_time,
+            )
+            db.session.add(new_entry)
+            db.session.commit()
+
+            # Preparando o conteúdo do e-mail utilizando um template HTML
+            to_email = email  # Usa o e-mail fornecido pelo usuário
+            subject = "Confirmação de Inscrição"
+
+            # Renderiza o template HTML como string, passando a variável 'responsavel' como 'nome_produtor'
+            html_content = render_template(
+                "email_template.html", nome_produtor=responsavel
+            )
+
+            # Dispara o e-mail após salvar a inscrição
+            send_email(to_email, subject, html_content)
+
+            return jsonify(
+                {
+                    "message": "Vídeo e PDF registrados com sucesso!",
+                    "link_arquivo": link_video,
+                    "link_pdf": link_pdf,
+                }
+            )
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     return render_template("form.html")
+
+
+def send_email(to_email, subject, html_content):
+    with app.app_context():
+        msg = Message(subject, recipients=[to_email], html=html_content)
+        mail.send(msg)
 
 
 def enviar_whatsapp(message, celular):
@@ -115,7 +159,6 @@ def enviar_whatsapp(message, celular):
 
     phone = celular
 
-    # Primeiro, enviamos a mensagem de texto
     conteudo_texto = json.dumps({"phone": phone, "message": message})
 
     post_url_texto = (
