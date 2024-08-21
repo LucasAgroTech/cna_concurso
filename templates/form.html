@@ -53,6 +53,11 @@
         transition: all 0.2s ease-in-out;
       }
 
+      h4 {
+        font-size: 20px;
+        margin-left: 5px;
+      }
+
       h2 {
         margin-top: 2rem;
       }
@@ -276,6 +281,55 @@
           </select>
         </div>
         <div class="form-group">
+          <select
+            class="form-control"
+            id="senarSelect"
+            name="senarSelect"
+            required
+          >
+            <option value="">Selecione uma unidade do Senar...</option>
+            <option value="Senar Administração Central">
+              Senar Administração Central
+            </option>
+            <option value="Senar Acre">Senar Acre</option>
+            <option value="Senar Alagoas">Senar Alagoas</option>
+            <option value="Senar Amapá">Senar Amapá</option>
+            <option value="Senar Amazonas">Senar Amazonas</option>
+            <option value="Senar Bahia">Senar Bahia</option>
+            <option value="Senar Ceará">Senar Ceará</option>
+            <option value="Senar Distrito Federal">
+              Senar Distrito Federal
+            </option>
+            <option value="Senar Espírito Santo">Senar Espírito Santo</option>
+            <option value="Senar Goiás">Senar Goiás</option>
+            <option value="Senar Maranhão">Senar Maranhão</option>
+            <option value="Senar Mato Grosso">Senar Mato Grosso</option>
+            <option value="Senar Mato Grosso do Sul">
+              Senar Mato Grosso do Sul
+            </option>
+            <option value="Senar Minas Gerais">Senar Minas Gerais</option>
+            <option value="Senar Pará">Senar Pará</option>
+            <option value="Senar Paraíba">Senar Paraíba</option>
+            <option value="Senar Paraná">Senar Paraná</option>
+            <option value="Senar Pernambuco">Senar Pernambuco</option>
+            <option value="Senar Piauí">Senar Piauí</option>
+            <option value="Senar Rio de Janeiro">Senar Rio de Janeiro</option>
+            <option value="Senar Rio Grande do Norte">
+              Senar Rio Grande do Norte
+            </option>
+            <option value="Senar Rio Grande do Sul">
+              Senar Rio Grande do Sul
+            </option>
+            <option value="Senar Rondônia">Senar Rondônia</option>
+            <option value="Senar Roraima">Senar Roraima</option>
+            <option value="Senar Santa Catarina">Senar Santa Catarina</option>
+            <option value="Senar São Paulo">Senar São Paulo</option>
+            <option value="Senar Sergipe">Senar Sergipe</option>
+            <option value="Senar Tocantins">Senar Tocantins</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <input
             type="text"
             class="form-control"
@@ -286,14 +340,12 @@
           />
         </div>
         <div class="form-group">
-          <input
-            type="text"
-            class="form-control"
-            id="tema"
-            name="tema"
-            placeholder="Tema"
-            required
-          />
+          <div
+            class="title-block"
+            style="margin-top: 2rem; margin-bottom: 1rem"
+          >
+            <h4><i class="fas fa-play"></i> Sobre o Vídeo</h4>
+          </div>
         </div>
         <div class="form-group">
           <select
@@ -317,11 +369,22 @@
             <option value="Sistema de Produção Agropecuário">
               Sistema de Produção Agropecuário
             </option>
-            <option value="Bem-estar Animal: as 5 liberdades dos animais">
-              Bem-estar Animal: as 5 liberdades dos animais
+            <option value="Saúde e Segurança no Trabalho Rural">
+              Saúde e Segurança no Trabalho Rural
             </option>
             <option value="Meio Ambiente">Meio Ambiente</option>
             <option value="Gestão Rural">Gestão Rural</option>
+            <option value="Agricultura Digital">Agricultura Digital</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <select
+            class="form-control"
+            id="detalhesFormacao"
+            name="detalhesFormacao"
+            style="display: none"
+          >
+            <!-- As opções serão preenchidas dinamicamente via JavaScript -->
           </select>
         </div>
         <div class="form-group">
@@ -330,26 +393,57 @@
             <option value="Alimentação e Nutrição">
               Alimentação e Nutrição
             </option>
-            <option value="Inclusão Digital">Inclusão Digital</option>
+            <option value="Cultura">Cultura</option>
             <option value="Organização Comunitária">
               Organização Comunitária
             </option>
             <option value="Saúde Preventiva">Saúde Preventiva</option>
+            <option value="Artesanato">Artesanato</option>
+            <option value="Esporte e Lazer">Esporte e Lazer</option>
+            <option value="Apoio as Comunidades Rurais">
+              Apoio as Comunidades Rurais
+            </option>
+            <option value="Alimentação e Nutrição">
+              Alimentação e Nutrição
+            </option>
+            <option value="Educação">Educação</option>
           </select>
         </div>
+
+        <div class="form-group">
+          <select
+            class="form-control"
+            id="detalhesPromocao"
+            name="detalhesPromocao"
+            style="display: none"
+          >
+            <!-- As opções serão preenchidas dinamicamente via JavaScript -->
+          </select>
+        </div>
+
         <div class="form-group">
           <select class="form-control" id="assistencia" name="assistencia">
             <option value="">Selecione uma assistência...</option>
-            <option value="Aumento da Produção Custos">
-              Aumento da Produção Custos
-            </option>
-            <option value="Geração de renda e redução de">
-              Geração de renda e redução de
+            <option value="Meio Ambiente">Meio Ambiente</option>
+            <option value="Aumento da Prdução">Aumento da Prdução</option>
+            <option value="Geração de renda e redução de Custps">
+              Geração de renda e redução de Custos
             </option>
             <option value="Produzindo alimento com respeito ao meio ambiente">
               Produzindo alimento com respeito ao meio ambiente
             </option>
             <option value="Qualidade de Vida">Qualidade de Vida</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <select
+            class="form-control"
+            id="detalhesAssistencia"
+            name="detalhesAssistencia"
+            style="display: none"
+          >
+            <!-- As opções serão preenchidas dinamicamente via JavaScript -->
           </select>
         </div>
         <div class="form-group">
@@ -397,12 +491,14 @@
             name="acceptTerms"
             required
           />
-          <label class="form-check-label" for="acceptTerms"
-            >Eu aceito o
-            <a href="javascript:void(0)" id="link-termo-de-uso"
-              >termo de uso e autorizo o uso de imagem, nome e voz</a
-            ></label
-          >
+          <label class="form-check-label" for="acceptTerms">
+            Eu aceito o
+            <a href="javascript:void(0);" id="link-termo-de-uso"
+              >termo de uso e autorizo o uso de imagem, nome e voz.</a
+            >
+            Também autorizo o envio de mensagens via WhatsApp e outros meios de
+            comunicação.
+          </label>
         </div>
         <div class="form-group" style="padding-bottom: 2rem">
           <button type="submit" class="btn btn-primary">Enviar</button>
@@ -474,6 +570,154 @@
     </div>
 
     <script>
+      document
+        .getElementById("assistencia")
+        .addEventListener("change", function () {
+          var assistencia = this.value;
+          var detalhesSelect = document.getElementById("detalhesAssistencia");
+          var options = "";
+
+          if (assistencia === "Meio Ambiente") {
+            options = `
+                <option value="Práticas de conservação do solo e/ou da água">Práticas de conservação do solo e/ou da água</option>
+                <option value="Práticas ABC">Práticas ABC</option>
+                <option value="Proteção de nascentes">Proteção de nascentes</option>`;
+          } else if (assistencia === "Aumento da Produção") {
+            options = `
+                <option value="Produzir mais com os recursos disponíveis / Eficiência no uso dos recursos">Produzir mais com os recursos disponíveis / Eficiência no uso dos recursos</option>
+                <option value="Diluição do custo fixo com aumento de escala">Diluição do custo fixo com aumento de escala</option>
+                <option value="Técnicas e tecnologias que melhoram a eficiência e aumentam a produção">Técnicas e tecnologias que melhoram a eficiência e aumentam a produção</option>
+                <option value="Eficiência da mão de obra no aumento da produção">Eficiência da mão de obra no aumento da produção</option>`;
+          } else if (assistencia === "Geração de renda e redução de Custos") {
+            options = `
+                <option value="Redução de custos com insumos">Redução de custos com insumos</option>
+                <option value="Redução de custos no manejo animal / vegetal">Redução de custos no manejo animal / vegetal</option>
+                <option value="Agregação de valor em produtos agropecuários">Agregação de valor em produtos agropecuários</option>`;
+          } else if (
+            assistencia === "Produzindo alimento com respeito ao meio ambiente"
+          ) {
+            options = `
+                <option value="Práticas de conservação do solo e da água">Práticas de conservação do solo e da água</option>
+                <option value="Sistemas de produção agroecológicos">Sistemas de produção agroecológicos</option>
+                <option value="Uso racional de defensivos agrícolas">Uso racional de defensivos agrícolas</option>`;
+          } else if (assistencia === "Qualidade de Vida") {
+            options = `
+                <option value="Automatização, praticidade ou facilidade para melhorar o processo produtivo">Automatização, praticidade ou facilidade para melhorar o processo produtivo</option>
+                <option value="Segurança física, proteção e Ergonomia">Segurança física, proteção e Ergonomia</option>
+                <option value="Sucessão familiar e envolvimento da família">Sucessão familiar e envolvimento da família</option>`;
+          } else {
+            // Se não houver seleção válida, esconder o select de detalhes
+            detalhesSelect.style.display = "none";
+            return;
+          }
+
+          // Atualizar as opções do select de detalhes e mostrá-lo
+          detalhesSelect.innerHTML = options;
+          detalhesSelect.style.display = "block";
+        });
+
+      document
+        .getElementById("promocao")
+        .addEventListener("change", function () {
+          var promocao = this.value;
+          var detalhesSelect = document.getElementById("detalhesPromocao");
+          var options = "";
+
+          if (promocao === "Alimentação e Nutrição") {
+            options = `
+                <option value="Produção de alimentos">Produção de alimentos</option>
+                <option value="Aproveitamento integral de alimentos">Aproveitamento integral de alimentos</option>
+                <option value="Ações que estimulem a alimentação saudável">Ações que estimulem a alimentação saudável</option>
+                <option value="Ações de educação em saúde para alimentação saudável relacionadas a doenças crônicas">Ações de educação em saúde para alimentação saudável relacionadas a doenças crônicas</option>`;
+          } else if (promocao === "Cultura") {
+            options = `
+                <option value="Tradições culturais">Tradições culturais</option>
+                <option value="Culinárias regionais">Culinárias regionais</option>`;
+          } else if (promocao === "Organização Comunitária") {
+            options = `
+                <option value="Associativismo">Associativismo</option>
+                <option value="Cooperativismo">Cooperativismo</option>`;
+          } else if (promocao === "Saúde Preventiva") {
+            options = `
+                <option value="Promoção à saúde">Promoção à saúde</option>
+                <option value="Prevenção de doenças">Prevenção de doenças</option>
+                <option value="Qualidade de vida">Qualidade de vida</option>
+                <option value="Autocuidado">Autocuidado</option>
+                <option value="Hábitos saudáveis">Hábitos saudáveis</option>`;
+          } else if (promocao === "Artesanato") {
+            options = `
+                <option value="Biojoias">Biojoias</option>
+                <option value="Matéria-prima regional">Matéria-prima regional</option>`;
+          } else if (promocao === "Esporte e Lazer") {
+            options = `
+                <option value="Atividades que estimulam o desenvolvimento físico e psíquico">Atividades que estimulam o desenvolvimento físico e psíquico</option>`;
+          } else if (promocao === "Apoio as Comunidades Rurais") {
+            options = `
+                <option value="Cidadania rural">Cidadania rural</option>`;
+          } else if (promocao === "Educação") {
+            options = `
+                <option value="Educação de Jovens e Adultos">Educação de Jovens e Adultos</option>
+                <option value="Educação ambiental">Educação ambiental</option>
+                <option value="Educação financeira">Educação financeira</option>
+                <option value="Sucessão Rural">Sucessão Rural</option>`;
+          } else {
+            // Se não houver seleção válida, esconder o select de detalhes
+            detalhesSelect.style.display = "none";
+            return;
+          }
+
+          // Atualizar as opções do select de detalhes e mostrá-lo
+          detalhesSelect.innerHTML = options;
+          detalhesSelect.style.display = "block";
+        });
+
+      document
+        .getElementById("formacao")
+        .addEventListener("change", function () {
+          var formacao = this.value;
+          var detalhesSelect = document.getElementById("detalhesFormacao");
+          var options = "";
+
+          if (formacao === "Sistema de Produção Agropecuário") {
+            options = `
+                <option value="Produção vegetal">Produção vegetal</option>
+                <option value="Produção animal">Produção animal</option>
+                <option value="Produção orgânica">Produção orgânica</option>
+                <option value="Boas práticas agropecuárias">Boas práticas agropecuárias</option>
+                <option value="Manejo sanitário">Manejo sanitário</option>`;
+          } else if (formacao === "Meio Ambiente") {
+            options = `
+                <option value="Baixa emissão de carbono">Baixa emissão de carbono</option>
+                <option value="Bioeconomia">Bioeconomia</option>
+                <option value="Bioinsumos">Bioinsumos</option>
+                <option value="Agricultura e pecuária regenerativa">Agricultura e pecuária regenerativa</option>
+                <option value="Técnicas de retenção e infiltração de água no solo">Técnicas de retenção e infiltração de água no solo</option>
+                <option value="Compostagem e enriquecimento de dejetos animais">Compostagem e enriquecimento de dejetos animais</option>`;
+          } else if (formacao === "Agricultura Digital") {
+            options = `
+                <option value="Agricultura e pecuária de precisão">Agricultura e pecuária de precisão</option>
+                <option value="Tecnologias em máquinas agrícolas">Tecnologias em máquinas agrícolas</option>
+                <option value="Drones">Drones</option>
+                <option value="Geotecnologias">Geotecnologias</option>
+                <option value="Inteligência artificial">Inteligência artificial</option>`;
+          } else if (formacao === "Saúde e Segurança no Trabalho Rural") {
+            options = `
+                <option value="Ergonomia">Ergonomia</option>
+                <option value="Equipamentos de proteção individual (EPI) no trabalho rural">Equipamentos de proteção individual (EPI) no trabalho rural</option>
+                <option value="Uso correto e seguro de defensivos agrícolas">Uso correto e seguro de defensivos agrícolas</option>
+                <option value="Segurança no trabalho em máquinas, equipamentos e implementos">Segurança no trabalho em máquinas, equipamentos e implementos</option>
+                <option value="Normativa NR-31">Normativa NR-31</option>`;
+          } else {
+            // Se não houver seleção válida, esconder o select de detalhes
+            detalhesSelect.style.display = "none";
+            return;
+          }
+
+          // Atualizar as opções do select de detalhes e mostrá-lo
+          detalhesSelect.innerHTML = options;
+          detalhesSelect.style.display = "block";
+        });
+
       document.addEventListener("DOMContentLoaded", function () {
         const referenciaVideo = document.getElementById("referencia_video");
         const formacao = document

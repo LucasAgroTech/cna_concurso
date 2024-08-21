@@ -46,10 +46,13 @@ class FormEntry(db.Model):
     cpf = db.Column(db.String(32), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     endereco = db.Column(db.String(200), nullable=False)
+    senar = db.Column(db.String(200), nullable=False)
+    formacao_detail = db.Column(db.String(100), nullable=True)
+    promocao_detail = db.Column(db.String(100), nullable=True)
+    assistencia_detail = db.Column(db.String(100), nullable=True)
     cep = db.Column(db.String(32), nullable=False)
     estado = db.Column(db.String(32), nullable=False)
     telefone = db.Column(db.String(32), nullable=False)
-    tema = db.Column(db.String(100), nullable=False)
     referencia_video = db.Column(db.String(200), nullable=True)
     formacao = db.Column(db.String(100), nullable=False)
     promocao = db.Column(db.String(100), nullable=True)
@@ -71,12 +74,25 @@ def index():
 
         video_file = request.files.get("videoUpload")
         pdf_file = request.files.get("pdfUpload")
-        email = request.form["email"]
-        responsavel = request.form["nome"]
+        email = request.form.get("email")
+        responsavel = request.form.get("nome")
 
+        # Verifica se o arquivo de vídeo foi enviado
         if not video_file:
             return jsonify({"error": "Arquivo de vídeo é obrigatório."}), 400
 
+        # Verifica se o arquivo de vídeo tem um nome de arquivo válido e uma extensão de vídeo
+        if not video_file.filename.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
+            return (
+                jsonify(
+                    {
+                        "error": "O arquivo enviado não é um vídeo válido. Aceitamos formatos .mp4, .avi, .mov, .mkv."
+                    }
+                ),
+                400,
+            )
+
+        # Verifica se o arquivo PDF foi enviado e se é um PDF
         if not pdf_file or not pdf_file.filename.lower().endswith(".pdf"):
             return (
                 jsonify(
@@ -86,32 +102,39 @@ def index():
             )
 
         try:
+            # Tenta fazer o upload do vídeo
             upload_result_video = cloudinary.uploader.upload(
                 video_file, resource_type="video", folder="video_uploads"
             )
             link_video = upload_result_video.get("url")
 
+            # Tenta fazer o upload do PDF
             upload_result_pdf = cloudinary.uploader.upload(
                 pdf_file, resource_type="raw", folder="pdf_uploads"
             )
             link_pdf = upload_result_pdf.get("url")
 
+            # Obtém o horário de Brasília
             timezone_bsb = pytz.timezone("America/Sao_Paulo")
             bsb_time = datetime.now(timezone_bsb)
 
+            # Cria uma nova entrada no banco de dados
             new_entry = FormEntry(
                 nome=form_data.get("nome"),
                 cpf=form_data.get("cpf"),
                 email=form_data.get("email"),
                 endereco=form_data.get("endereco"),
+                senar=form_data.get("senarSelect"),
                 cep=form_data.get("cep"),
                 estado=form_data.get("estado"),
                 telefone=form_data.get("telefone"),
-                tema=form_data.get("tema"),
                 referencia_video=form_data.get("referencia_video"),
                 formacao=form_data.get("formacao"),
                 promocao=form_data.get("promocao"),
                 assistencia=form_data.get("assistencia"),
+                formacao_detail=form_data.get("detalhesFormacao"),
+                promocao_detail=form_data.get("detalhesPromocao"),
+                assistencia_detail=form_data.get("detalhesAssistencia"),
                 link_arquivo=link_video,
                 link_pdf=link_pdf,
                 aceite_termos=form_data.get("aceite_termos", "Não"),
@@ -134,14 +157,26 @@ def index():
 
             return jsonify(
                 {
-                    "message": "Vídeo e PDF registrados com sucesso!",
+                    "message": "Vídeo e termo de imagem registrados com sucesso!",
                     "link_arquivo": link_video,
                     "link_pdf": link_pdf,
                 }
             )
 
+        except cloudinary.exceptions.Error as cloudinary_error:
+            return (
+                jsonify(
+                    {"error": f"Erro ao fazer upload do vídeo: {str(cloudinary_error)}"}
+                ),
+                500,
+            )
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            return (
+                jsonify(
+                    {"error": f"Ocorreu um erro ao processar sua solicitação: {str(e)}"}
+                ),
+                500,
+            )
 
     return render_template("form.html")
 
