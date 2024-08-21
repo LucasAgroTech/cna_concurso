@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_file
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import pandas as pd
 import pytz
 import cloudinary.uploader
 import os
@@ -60,6 +61,7 @@ class FormEntry(db.Model):
     link_arquivo = db.Column(db.String(200), nullable=True)
     link_pdf = db.Column(db.String(200), nullable=False)
     aceite_termos = db.Column(db.String(200), nullable=True)
+    aceite_whatsapp = db.Column(db.String(200), nullable=True)
     data_envio = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
 
@@ -137,7 +139,8 @@ def index():
                 assistencia_detail=form_data.get("detalhesAssistencia"),
                 link_arquivo=link_video,
                 link_pdf=link_pdf,
-                aceite_termos=form_data.get("aceite_termos", "Não"),
+                aceite_termos=form_data.get("acceptTerms", "Não"),
+                aceite_whatsapp=form_data.get("acceptWhatsApp", "Não"),
                 data_envio=bsb_time,
             )
             db.session.add(new_entry)
@@ -211,6 +214,26 @@ def enviar_whatsapp(message, celular):
     except requests.exceptions.HTTPError as err:
         print("Erro na requisição de texto:", err)
         print("Resposta:", response_texto.text)
+
+
+@app.route("/download")
+def download():
+    entries = FormEntry.query.all()
+    data = [
+        {column.name: getattr(entry, column.name) for column in entry.__table__.columns}
+        for entry in entries
+    ]
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Entries")
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="entries.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 
 @app.route("/entries")
