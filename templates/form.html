@@ -582,6 +582,83 @@
     </div>
 
     <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const referenciaVideo = document.getElementById("referencia_video");
+        const formacao = document.getElementById("formacao");
+        const promocao = document.getElementById("promocao");
+        const assistencia = document.getElementById("assistencia");
+
+        // Função para limpar os selects
+        function resetSelect(selectElement) {
+          selectElement.selectedIndex = 0;
+          const detalhesSelect = selectElement
+            .closest(".form-group")
+            .nextElementSibling.querySelector("select");
+          if (detalhesSelect) {
+            detalhesSelect.style.display = "none";
+            detalhesSelect.innerHTML = ""; // Limpa as opções dos detalhes
+          }
+        }
+
+        // Função para esconder todos os selects
+        function hideAll() {
+          formacao.closest(".form-group").style.display = "none";
+          promocao.closest(".form-group").style.display = "none";
+          assistencia.closest(".form-group").style.display = "none";
+        }
+
+        // Função para mostrar o select correto com base no valor selecionado
+        function showField() {
+          const value = referenciaVideo.value;
+          hideAll();
+          resetSelect(formacao);
+          resetSelect(promocao);
+          resetSelect(assistencia);
+          if (value === "Formação Profissional Rural") {
+            formacao.closest(".form-group").style.display = "block";
+          } else if (value === "Promoção Social") {
+            promocao.closest(".form-group").style.display = "block";
+          } else if (value === "Assistência Técnica e Gerencial") {
+            assistencia.closest(".form-group").style.display = "block";
+          }
+        }
+
+        // Esconder todos os selects inicialmente
+        hideAll();
+
+        // Adicionar evento de mudança para referência de vídeo
+        referenciaVideo.addEventListener("change", showField);
+
+        // Adicionar eventos de mudança para limpar os selects subsequentes
+        formacao.addEventListener("change", function () {
+          resetSelect(promocao);
+          resetSelect(assistencia);
+        });
+
+        promocao.addEventListener("change", function () {
+          resetSelect(assistencia);
+        });
+
+        // Abrir e fechar modal
+        var modal = document.getElementById("termo-de-uso-modal");
+        var linkTermo = document.getElementById("link-termo-de-uso");
+        var span = document.getElementsByClassName("close")[0];
+
+        linkTermo.onclick = function () {
+          $(modal).modal("show");
+        };
+
+        span.onclick = function () {
+          $(modal).modal("hide");
+        };
+
+        window.onclick = function (event) {
+          if (event.target == modal) {
+            $(modal).modal("hide");
+          }
+        };
+      });
+
       document
         .getElementById("assistencia")
         .addEventListener("change", function () {
