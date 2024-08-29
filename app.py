@@ -97,15 +97,15 @@ def index():
             upload_options = {
                 "resource_type": "video",
                 "folder": "video_uploads",
-                "quality": "auto:best",  # Otimiza a qualidade automaticamente
-                "format": "mp4",  # Define o formato de saída para mp4
+                "quality": "auto:best",
+                "format": "mp4",
                 "transformation": [
                     {
-                        "width": 1280,  # Reduz a largura para 1280px
-                        "height": 720,  # Reduz a altura para 720px
-                        "crop": "scale",  # Redimensiona o vídeo mantendo as proporções
-                        "video_codec": "auto",  # Usa o melhor codec de vídeo disponível
-                        "bit_rate": "0.5m",  # Define a taxa de bits para compressão adicional
+                        "width": 1280,
+                        "height": 720,
+                        "crop": "scale",
+                        "video_codec": "auto",
+                        "bit_rate": "0.5m",
                     }
                 ],
             }
