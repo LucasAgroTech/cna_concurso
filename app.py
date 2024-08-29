@@ -59,8 +59,8 @@ class FormEntry(db.Model):
     promocao = db.Column(db.String(100), nullable=True)
     assistencia = db.Column(db.String(100), nullable=True)
     link_arquivo = db.Column(db.String(200), nullable=True)
-    link_pdf = db.Column(db.String(200), nullable=False)
-    aceite_termos = db.Column(db.String(200), nullable=True)
+    link_pdf = db.Column(db.String(200), nullable=True)
+    aceite_termos = db.Column(db.String(200), nullable=False)
     aceite_whatsapp = db.Column(db.String(200), nullable=True)
     data_envio = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
@@ -73,7 +73,6 @@ with app.app_context():
 def index():
     if request.method == "POST":
         form_data = request.form.to_dict()
-
         video_file = request.files.get("videoUpload")
         pdf_file = request.files.get("pdfUpload")
         email = request.form.get("email")
@@ -82,7 +81,6 @@ def index():
         # Verifica se o arquivo de vídeo foi enviado
         if not video_file:
             return jsonify({"error": "Arquivo de vídeo é obrigatório."}), 400
-
         # Verifica se o arquivo de vídeo tem um nome de arquivo válido e uma extensão de vídeo
         if not video_file.filename.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
             return (
@@ -94,33 +92,36 @@ def index():
                 400,
             )
 
-        # Verifica se o arquivo PDF foi enviado e se é um PDF
-        if not pdf_file or not pdf_file.filename.lower().endswith(".pdf"):
-            return (
-                jsonify(
-                    {"error": "Arquivo PDF é obrigatório e deve estar no formato PDF."}
-                ),
-                400,
-            )
-
         try:
-            # Tenta fazer o upload do vídeo
+            # Configuração de otimização de vídeo
+            upload_options = {
+                "resource_type": "video",
+                "folder": "video_uploads",
+                "quality": "auto:best",  # Otimiza a qualidade automaticamente
+                "format": "mp4",  # Define o formato de saída para mp4
+                "transformation": [
+                    {
+                        "width": 1280,  # Reduz a largura para 1280px
+                        "height": 720,  # Reduz a altura para 720px
+                        "crop": "scale",  # Redimensiona o vídeo mantendo as proporções
+                        "video_codec": "auto",  # Usa o melhor codec de vídeo disponível
+                        "bit_rate": "0.5m",  # Define a taxa de bits para compressão adicional
+                    }
+                ],
+            }
+
             upload_result_video = cloudinary.uploader.upload(
-                video_file, resource_type="video", folder="video_uploads"
+                video_file, **upload_options
             )
             link_video = upload_result_video.get("url")
-
-            # Tenta fazer o upload do PDF
             upload_result_pdf = cloudinary.uploader.upload(
                 pdf_file, resource_type="raw", folder="pdf_uploads"
             )
             link_pdf = upload_result_pdf.get("url")
 
-            # Obtém o horário de Brasília
             timezone_bsb = pytz.timezone("America/Sao_Paulo")
             bsb_time = datetime.now(timezone_bsb)
 
-            # Cria uma nova entrada no banco de dados
             new_entry = FormEntry(
                 nome=form_data.get("nome"),
                 cpf=form_data.get("cpf"),
@@ -146,40 +147,23 @@ def index():
             db.session.add(new_entry)
             db.session.commit()
 
-            # Preparando o conteúdo do e-mail utilizando um template HTML
-            to_email = email  # Usa o e-mail fornecido pelo usuário
-            subject = "Confirmação de Inscrição"
-
-            # Renderiza o template HTML como string, passando a variável 'responsavel' como 'nome_produtor'
             html_content = render_template(
                 "email_template.html", nome_produtor=responsavel
             )
-
-            # Dispara o e-mail após salvar a inscrição
-            send_email(to_email, subject, html_content)
+            send_email(email, "Confirmação de Inscrição", html_content)
 
             return jsonify(
                 {
-                    "message": "Vídeo e termo de imagem registrados com sucesso!",
+                    "message": "Inscrição confirmada com sucesso!",
                     "link_arquivo": link_video,
                     "link_pdf": link_pdf,
                 }
             )
 
         except cloudinary.exceptions.Error as cloudinary_error:
-            return (
-                jsonify(
-                    {"error": f"Erro ao fazer upload do vídeo: {str(cloudinary_error)}"}
-                ),
-                500,
-            )
+            return jsonify({"error": f"Erro no upload: {str(cloudinary_error)}"}), 500
         except Exception as e:
-            return (
-                jsonify(
-                    {"error": f"Ocorreu um erro ao processar sua solicitação: {str(e)}"}
-                ),
-                500,
-            )
+            return jsonify({"error": f"Erro no processamento: {str(e)}"}), 500
 
     return render_template("form.html")
 
