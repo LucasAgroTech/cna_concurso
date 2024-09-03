@@ -60,7 +60,7 @@ class FormEntry(db.Model):
     assistencia = db.Column(db.String(100), nullable=True)
     link_arquivo = db.Column(db.String(200), nullable=True)
     link_pdf = db.Column(db.String(200), nullable=True)
-    aceite_termos = db.Column(db.String(200), nullable=False)
+    aceite_termos = db.Column(db.String(200), nullable=True)
     aceite_whatsapp = db.Column(db.String(200), nullable=True)
     data_envio = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
@@ -78,28 +78,24 @@ def index():
         email = request.form.get("email")
         responsavel = request.form.get("nome")
 
-        # Verifica se o arquivo de vídeo foi enviado
         if not video_file:
             return jsonify({"error": "Arquivo de vídeo é obrigatório."}), 400
-        # Verifica se o arquivo de vídeo tem um nome de arquivo válido e uma extensão de vídeo
         if not video_file.filename.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
             return (
                 jsonify(
-                    {
-                        "error": "O arquivo enviado não é um vídeo válido. Aceitamos formatos .mp4, .avi, .mov, .mkv."
-                    }
+                    {"error": "Formato de vídeo inválido. Use: .mp4, .avi, .mov, .mkv."}
                 ),
                 400,
             )
 
         try:
-            # Configuração de otimização de vídeo
-            upload_options = {
-                "resource_type": "video",
-                "folder": "video_uploads",
-                "quality": "auto:best",
-                "format": "mp4",
-                "transformation": [
+            upload_result_video = cloudinary.uploader.upload(
+                video_file,
+                resource_type="video",
+                folder="video_uploads",
+                quality="auto:best",
+                format="mp4",
+                transformation=[
                     {
                         "width": 1280,
                         "height": 720,
@@ -108,16 +104,19 @@ def index():
                         "bit_rate": "0.5m",
                     }
                 ],
-            }
-
-            upload_result_video = cloudinary.uploader.upload(
-                video_file, **upload_options
             )
             link_video = upload_result_video.get("url")
-            upload_result_pdf = cloudinary.uploader.upload(
-                pdf_file, resource_type="raw", folder="pdf_uploads"
-            )
-            link_pdf = upload_result_pdf.get("url")
+
+            link_pdf = None  # Inicializa link_pdf como None
+            if (
+                pdf_file and pdf_file.filename != ""
+            ):  # Verifica se um arquivo PDF foi realmente enviado
+                upload_result_pdf = cloudinary.uploader.upload(
+                    pdf_file.read(),  # Lê o conteúdo do arquivo
+                    resource_type="raw",
+                    folder="pdf_uploads",
+                )
+                link_pdf = upload_result_pdf.get("url")
 
             timezone_bsb = pytz.timezone("America/Sao_Paulo")
             bsb_time = datetime.now(timezone_bsb)
@@ -125,7 +124,7 @@ def index():
             new_entry = FormEntry(
                 nome=form_data.get("nome"),
                 cpf=form_data.get("cpf"),
-                email=form_data.get("email"),
+                email=email,
                 endereco=form_data.get("endereco"),
                 senar=form_data.get("senarSelect"),
                 cep=form_data.get("cep"),
@@ -156,7 +155,7 @@ def index():
                 {
                     "message": "Inscrição confirmada com sucesso!",
                     "link_arquivo": link_video,
-                    "link_pdf": link_pdf,
+                    "link_pdf": link_pdf or "Nenhum arquivo PDF enviado.",
                 }
             )
 
