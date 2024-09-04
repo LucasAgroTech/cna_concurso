@@ -89,25 +89,13 @@ def index():
             )
 
         try:
+            # Upload do vídeo sem restrições de qualidade ou transformações
             upload_result_video = cloudinary.uploader.upload(
-                video_file,
-                resource_type="video",
-                folder="video_uploads",
-                quality="auto:best",
-                format="mp4",
-                transformation=[
-                    {
-                        "width": 1280,
-                        "height": 720,
-                        "crop": "scale",
-                        "video_codec": "auto",
-                        "bit_rate": "0.5m",
-                    }
-                ],
+                video_file, resource_type="video", folder="video_uploads"
             )
             link_video = upload_result_video.get("url")
 
-            link_pdf = None  # Inicializa link_pdf como None
+            link_pdf = None
             if (
                 pdf_file and pdf_file.filename != ""
             ):  # Verifica se um arquivo PDF foi realmente enviado
