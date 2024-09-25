@@ -19,6 +19,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/additional-methods.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
+
 
     <style>
       .form-control-file {
@@ -440,23 +442,13 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="btn btn-upload-video">
+          <button type="button" id="upload_widget" class="btn btn-upload-video">
             <i class="fas fa-upload"></i> Carregar Vídeo
-            <span
-              id="file-name"
-              style="display: block; font-size: 0.8em; font-weight: 300"
-            ></span>
-            <input
-              type="file"
-              class="form-control-file"
-              id="videoUpload"
-              name="videoUpload"
-              accept="video/*"
-              required
-              hidden
-            />
-          </label>
+          </button>
+          <span id="file-name" style="display: block; font-size: 0.8em; font-weight: 300"></span>
+          <input type="hidden" id="videoUrl" name="videoUrl" />
         </div>
+        
         <div class="form-group">
           <label class="btn btn-upload-pdf">
             <i class="fas fa-file-pdf"></i> Termo de Autorização de
@@ -562,11 +554,41 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Inicialização do widget do Cloudinary
+        var myWidget = cloudinary.createUploadWidget(
+          {
+            cloudName: 'hbmghdcte',
+            uploadPreset: 'unsigned_preset',
+            sources: ['local', 'camera'],
+            resourceType: 'video',
+            folder: 'video_uploads',
+          },
+          (error, result) => {
+            if (!error && result && result.event === 'success') {
+              console.log('Upload concluído com sucesso: ', result.info);
+              // Define a URL no campo oculto
+              document.getElementById('videoUrl').value = result.info.secure_url;
+              // Exibe o nome do arquivo
+              document.getElementById('file-name').textContent = result.info.original_filename;
+            }
+          }
+        );
+    
+        // Evento para abrir o widget de upload
+        document.getElementById('upload_widget').addEventListener(
+          'click',
+          function () {
+            myWidget.open();
+          },
+          false
+        );
+    
+        // Referências aos elementos do DOM
         const referenciaVideo = document.getElementById("referencia_video");
         const formacao = document.getElementById("formacao");
         const promocao = document.getElementById("promocao");
         const assistencia = document.getElementById("assistencia");
-
+    
         // Função para limpar os selects
         function resetSelect(selectElement) {
           selectElement.selectedIndex = 0;
@@ -578,14 +600,14 @@
             detalhesSelect.innerHTML = "";
           }
         }
-
+    
         // Função para esconder todos os selects
         function hideAll() {
           formacao.closest(".form-group").style.display = "none";
           promocao.closest(".form-group").style.display = "none";
           assistencia.closest(".form-group").style.display = "none";
         }
-
+    
         // Função para mostrar o select correto com base no valor selecionado
         function showField() {
           const value = referenciaVideo.value;
@@ -601,309 +623,237 @@
             assistencia.closest(".form-group").style.display = "block";
           }
         }
-
+    
         // Esconder todos os selects inicialmente
         hideAll();
-
-        // Adicionar evento de mudança para referência de vídeo
+    
+        // Eventos para os selects
         referenciaVideo.addEventListener("change", showField);
-
-        // Adicionar eventos de mudança para limpar os selects subsequentes
+    
         formacao.addEventListener("change", function () {
           resetSelect(promocao);
           resetSelect(assistencia);
         });
-
+    
         promocao.addEventListener("change", function () {
           resetSelect(assistencia);
         });
-
+    
         // Abrir e fechar modal
         var modal = document.getElementById("termo-de-uso-modal");
         var linkTermo = document.getElementById("link-termo-de-uso");
         var span = document.getElementsByClassName("close")[0];
-
+    
         linkTermo.onclick = function () {
           $(modal).modal("show");
         };
-
+    
         span.onclick = function () {
           $(modal).modal("hide");
         };
-
+    
         window.onclick = function (event) {
           if (event.target == modal) {
             $(modal).modal("hide");
           }
         };
-      });
-
-      document
-        .getElementById("assistencia")
-        .addEventListener("change", function () {
-          var assistencia = this.value;
-          var detalhesSelect = document.getElementById("detalhesAssistencia");
-          var options = "";
-
-          if (assistencia === "Meio Ambiente") {
-            options = `
-                <option value="Práticas de conservação do solo e/ou da água">Práticas de conservação do solo e/ou da água</option>
-                <option value="Práticas ABC">Práticas ABC</option>
-                <option value="Proteção de nascentes">Proteção de nascentes</option>`;
-          } else if (assistencia === "Aumento da Produção") {
-            options = `
-                <option value="Produzir mais com os recursos disponíveis / Eficiência no uso dos recursos">Produzir mais com os recursos disponíveis / Eficiência no uso dos recursos</option>
-                <option value="Diluição do custo fixo com aumento de escala">Diluição do custo fixo com aumento de escala</option>
-                <option value="Técnicas e tecnologias que melhoram a eficiência e aumentam a produção">Técnicas e tecnologias que melhoram a eficiência e aumentam a produção</option>
-                <option value="Eficiência da mão de obra no aumento da produção">Eficiência da mão de obra no aumento da produção</option>`;
-          } else if (assistencia === "Geração de renda e redução de Custos") {
-            options = `
-                <option value="Redução de custos com insumos">Redução de custos com insumos</option>
-                <option value="Redução de custos no manejo animal / vegetal">Redução de custos no manejo animal / vegetal</option>
-                <option value="Agregação de valor em produtos agropecuários">Agregação de valor em produtos agropecuários</option>`;
-          } else if (
-            assistencia === "Produzindo alimento com respeito ao meio ambiente"
-          ) {
-            options = `
-                <option value="Práticas de conservação do solo e da água">Práticas de conservação do solo e da água</option>
-                <option value="Sistemas de produção agroecológicos">Sistemas de produção agroecológicos</option>
-                <option value="Uso racional de defensivos agrícolas">Uso racional de defensivos agrícolas</option>`;
-          } else if (assistencia === "Qualidade de Vida") {
-            options = `
-                <option value="Automatização, praticidade ou facilidade para melhorar o processo produtivo">Automatização, praticidade ou facilidade para melhorar o processo produtivo</option>
-                <option value="Segurança física, proteção e Ergonomia">Segurança física, proteção e Ergonomia</option>
-                <option value="Sucessão familiar e envolvimento da família">Sucessão familiar e envolvimento da família</option>`;
-          } else {
-            // Se não houver seleção válida, esconder o select de detalhes
-            detalhesSelect.style.display = "none";
-            return;
-          }
-
-          // Atualizar as opções do select de detalhes e mostrá-lo
-          detalhesSelect.innerHTML = options;
-          detalhesSelect.style.display = "block";
-        });
-
-      document
-        .getElementById("promocao")
-        .addEventListener("change", function () {
-          var promocao = this.value;
-          var detalhesSelect = document.getElementById("detalhesPromocao");
-          var options = "";
-
-          if (promocao === "Alimentação e Nutrição") {
-            options = `
-                <option value="Produção de alimentos">Produção de alimentos</option>
-                <option value="Aproveitamento integral de alimentos">Aproveitamento integral de alimentos</option>
-                <option value="Ações que estimulem a alimentação saudável">Ações que estimulem a alimentação saudável</option>
-                <option value="Ações de educação em saúde para alimentação saudável relacionadas a doenças crônicas">Ações de educação em saúde para alimentação saudável relacionadas a doenças crônicas</option>`;
-          } else if (promocao === "Cultura") {
-            options = `
-                <option value="Tradições culturais">Tradições culturais</option>
-                <option value="Culinárias regionais">Culinárias regionais</option>`;
-          } else if (promocao === "Organização Comunitária") {
-            options = `
-                <option value="Associativismo">Associativismo</option>
-                <option value="Cooperativismo">Cooperativismo</option>`;
-          } else if (promocao === "Saúde Preventiva") {
-            options = `
-                <option value="Promoção à saúde">Promoção à saúde</option>
-                <option value="Prevenção de doenças">Prevenção de doenças</option>
-                <option value="Qualidade de vida">Qualidade de vida</option>
-                <option value="Autocuidado">Autocuidado</option>
-                <option value="Hábitos saudáveis">Hábitos saudáveis</option>`;
-          } else if (promocao === "Artesanato") {
-            options = `
-                <option value="Biojoias">Biojoias</option>
-                <option value="Matéria-prima regional">Matéria-prima regional</option>`;
-          } else if (promocao === "Esporte e Lazer") {
-            options = `
-                <option value="Atividades que estimulam o desenvolvimento físico e psíquico">Atividades que estimulam o desenvolvimento físico e psíquico</option>`;
-          } else if (promocao === "Apoio as Comunidades Rurais") {
-            options = `
-                <option value="Cidadania rural">Cidadania rural</option>`;
-          } else if (promocao === "Educação") {
-            options = `
-                <option value="Educação de Jovens e Adultos">Educação de Jovens e Adultos</option>
-                <option value="Educação ambiental">Educação ambiental</option>
-                <option value="Educação financeira">Educação financeira</option>
-                <option value="Sucessão Rural">Sucessão Rural</option>`;
-          } else {
-            // Se não houver seleção válida, esconder o select de detalhes
-            detalhesSelect.style.display = "none";
-            return;
-          }
-
-          // Atualizar as opções do select de detalhes e mostrá-lo
-          detalhesSelect.innerHTML = options;
-          detalhesSelect.style.display = "block";
-        });
-
-      document
-        .getElementById("formacao")
-        .addEventListener("change", function () {
-          var formacao = this.value;
-          var detalhesSelect = document.getElementById("detalhesFormacao");
-          var options = "";
-
-          if (formacao === "Sistema de Produção Agropecuário") {
-            options = `
-                <option value="Produção vegetal">Produção vegetal</option>
-                <option value="Produção animal">Produção animal</option>
-                <option value="Produção orgânica">Produção orgânica</option>
-                <option value="Boas práticas agropecuárias">Boas práticas agropecuárias</option>
-                <option value="Manejo sanitário">Manejo sanitário</option>`;
-          } else if (formacao === "Meio Ambiente") {
-            options = `
-                <option value="Baixa emissão de carbono">Baixa emissão de carbono</option>
-                <option value="Bioeconomia">Bioeconomia</option>
-                <option value="Bioinsumos">Bioinsumos</option>
-                <option value="Agricultura e pecuária regenerativa">Agricultura e pecuária regenerativa</option>
-                <option value="Técnicas de retenção e infiltração de água no solo">Técnicas de retenção e infiltração de água no solo</option>
-                <option value="Compostagem e enriquecimento de dejetos animais">Compostagem e enriquecimento de dejetos animais</option>`;
-          } else if (formacao === "Agricultura Digital") {
-            options = `
-                <option value="Agricultura e pecuária de precisão">Agricultura e pecuária de precisão</option>
-                <option value="Tecnologias em máquinas agrícolas">Tecnologias em máquinas agrícolas</option>
-                <option value="Drones">Drones</option>
-                <option value="Geotecnologias">Geotecnologias</option>
-                <option value="Inteligência artificial">Inteligência artificial</option>`;
-          } else if (formacao === "Saúde e Segurança no Trabalho Rural") {
-            options = `
-                <option value="Ergonomia">Ergonomia</option>
-                <option value="Equipamentos de proteção individual (EPI) no trabalho rural">Equipamentos de proteção individual (EPI) no trabalho rural</option>
-                <option value="Uso correto e seguro de defensivos agrícolas">Uso correto e seguro de defensivos agrícolas</option>
-                <option value="Segurança no trabalho em máquinas, equipamentos e implementos">Segurança no trabalho em máquinas, equipamentos e implementos</option>
-                <option value="Normativa NR-31">Normativa NR-31</option>`;
-          } else {
-            // Se não houver seleção válida, esconder o select de detalhes
-            detalhesSelect.style.display = "none";
-            return;
-          }
-
-          // Atualizar as opções do select de detalhes e mostrá-lo
-          detalhesSelect.innerHTML = options;
-          detalhesSelect.style.display = "block";
-        });
-
-      document.addEventListener("DOMContentLoaded", function () {
-        const referenciaVideo = document.getElementById("referencia_video");
-        const formacao = document
-          .getElementById("formacao")
-          .closest(".form-group");
-        const promocao = document
-          .getElementById("promocao")
-          .closest(".form-group");
-        const assistencia = document
+    
+        // Eventos para os detalhes dos selects
+        document
           .getElementById("assistencia")
-          .closest(".form-group");
-
-        function hideAll() {
-          formacao.style.display = "none";
-          promocao.style.display = "none";
-          assistencia.style.display = "none";
-        }
-
-        function showField() {
-          const value = referenciaVideo.value;
-          hideAll();
-          if (value === "Formação Profissional Rural") {
-            formacao.style.display = "block";
-          } else if (value === "Promoção Social") {
-            promocao.style.display = "block";
-          } else if (value === "Assistência Técnica e Gerencial") {
-            assistencia.style.display = "block";
-          }
-        }
-
-        hideAll();
-
-        referenciaVideo.addEventListener("change", showField);
-
-        // Abrir e fechar modal
-        var modal = document.getElementById("termo-de-uso-modal");
-        var linkTermo = document.getElementById("link-termo-de-uso");
-        var span = document.getElementsByClassName("close")[0];
-
-        linkTermo.onclick = function () {
-          $(modal).modal("show");
-        };
-
-        span.onclick = function () {
-          $(modal).modal("hide");
-        };
-
-        window.onclick = function (event) {
-          if (event.target == modal) {
-            $(modal).modal("hide");
-          }
-        };
-      });
-      document
-        .getElementById("pdfUpload")
-        .addEventListener("change", function (event) {
-          const file = event.target.files[0];
-          if (!file) {
-            document.getElementById("pdf-file-name").textContent = "";
-            return;
-          }
-          const fileName = file.name;
-          const truncatedFileName =
-            fileName.length > 20 ? fileName.substring(0, 17) + "..." : fileName;
-          document.getElementById("pdf-file-name").textContent =
-            truncatedFileName;
-        });
-
-      document
-        .getElementById("videoUpload")
-        .addEventListener("change", function (event) {
-          const file = event.target.files[0];
-          if (!file) {
-            document.getElementById("file-name").textContent = "";
-            return;
-          }
-          const fileName = file.name;
-          const truncatedFileName =
-            fileName.length > 20 ? fileName.substring(0, 17) + "..." : fileName;
-          document.getElementById("file-name").textContent = truncatedFileName;
-          const reader = new FileReader();
-          reader.onloadstart = function (e) {
-            document.getElementById("uploadProgress").value = 0;
-          };
-          reader.onprogress = function (e) {
-            if (e.lengthComputable) {
-              const percentComplete = parseInt((e.loaded / e.total) * 100);
-              document.getElementById("uploadProgress").value = percentComplete;
+          .addEventListener("change", function () {
+            var assistencia = this.value;
+            var detalhesSelect = document.getElementById("detalhesAssistencia");
+            var options = "";
+    
+            if (assistencia === "Meio Ambiente") {
+              options = `
+                  <option value="Práticas de conservação do solo e/ou da água">Práticas de conservação do solo e/ou da água</option>
+                  <option value="Práticas ABC">Práticas ABC</option>
+                  <option value="Proteção de nascentes">Proteção de nascentes</option>`;
+            } else if (assistencia === "Aumento da Produção") {
+              options = `
+                  <option value="Produzir mais com os recursos disponíveis / Eficiência no uso dos recursos">Produzir mais com os recursos disponíveis / Eficiência no uso dos recursos</option>
+                  <option value="Diluição do custo fixo com aumento de escala">Diluição do custo fixo com aumento de escala</option>
+                  <option value="Técnicas e tecnologias que melhoram a eficiência e aumentam a produção">Técnicas e tecnologias que melhoram a eficiência e aumentam a produção</option>
+                  <option value="Eficiência da mão de obra no aumento da produção">Eficiência da mão de obra no aumento da produção</option>`;
+            } else if (assistencia === "Geração de renda e redução de Custos") {
+              options = `
+                  <option value="Redução de custos com insumos">Redução de custos com insumos</option>
+                  <option value="Redução de custos no manejo animal / vegetal">Redução de custos no manejo animal / vegetal</option>
+                  <option value="Agregação de valor em produtos agropecuários">Agregação de valor em produtos agropecuários</option>`;
+            } else if (assistencia === "Qualidade de Vida") {
+              options = `
+                  <option value="Automatização, praticidade ou facilidade para melhorar o processo produtivo">Automatização, praticidade ou facilidade para melhorar o processo produtivo</option>
+                  <option value="Segurança física, proteção e Ergonomia">Segurança física, proteção e Ergonomia</option>
+                  <option value="Sucessão familiar e envolvimento da família">Sucessão familiar e envolvimento da família</option>`;
+            } else {
+              // Se não houver seleção válida, esconder o select de detalhes
+              detalhesSelect.style.display = "none";
+              return;
             }
-          };
-          reader.onloadend = function (e) {
-            document.getElementById("uploadProgress").value = 100;
-          };
-          reader.readAsDataURL(file);
-        });
-      document.querySelector("form").addEventListener("submit", function (e) {
-        e.preventDefault(); // Impede o envio do formulário
-        var form = this;
-        var formData = new FormData(form);
-
-        // Verificar se todos os campos requeridos estão preenchidos
-        var allFilled = true;
-        form.querySelectorAll("[required]").forEach(function (element) {
-          if (!element.value) {
-            allFilled = false;
-          }
-        });
-
-        if (!allFilled) {
-          Swal.fire({
-            icon: "error",
-            title: "Erro ao enviar",
-            text: "Por favor, preencha todos os campos obrigatórios.",
-            confirmButtonColor: "#dc3545",
-            confirmButtonText: "OK",
+    
+            // Atualizar as opções do select de detalhes e mostrá-lo
+            detalhesSelect.innerHTML = options;
+            detalhesSelect.style.display = "block";
           });
-        } else {
-          // Processo de envio do formulário se todos os campos estiverem preenchidos
+    
+        document
+          .getElementById("promocao")
+          .addEventListener("change", function () {
+            var promocao = this.value;
+            var detalhesSelect = document.getElementById("detalhesPromocao");
+            var options = "";
+    
+            if (promocao === "Alimentação e Nutrição") {
+              options = `
+                  <option value="Produção de alimentos">Produção de alimentos</option>
+                  <option value="Aproveitamento integral de alimentos">Aproveitamento integral de alimentos</option>
+                  <option value="Ações que estimulem a alimentação saudável">Ações que estimulem a alimentação saudável</option>
+                  <option value="Ações de educação em saúde para alimentação saudável relacionadas a doenças crônicas">Ações de educação em saúde para alimentação saudável relacionadas a doenças crônicas</option>`;
+            } else if (promocao === "Cultura") {
+              options = `
+                  <option value="Tradições culturais">Tradições culturais</option>
+                  <option value="Culinárias regionais">Culinárias regionais</option>`;
+            } else if (promocao === "Organização Comunitária") {
+              options = `
+                  <option value="Associativismo">Associativismo</option>
+                  <option value="Cooperativismo">Cooperativismo</option>`;
+            } else if (promocao === "Saúde Preventiva") {
+              options = `
+                  <option value="Promoção à saúde">Promoção à saúde</option>
+                  <option value="Prevenção de doenças">Prevenção de doenças</option>
+                  <option value="Qualidade de vida">Qualidade de vida</option>
+                  <option value="Autocuidado">Autocuidado</option>
+                  <option value="Hábitos saudáveis">Hábitos saudáveis</option>`;
+            } else if (promocao === "Artesanato") {
+              options = `
+                  <option value="Biojoias">Biojoias</option>
+                  <option value="Matéria-prima regional">Matéria-prima regional</option>`;
+            } else if (promocao === "Esporte e Lazer") {
+              options = `
+                  <option value="Atividades que estimulam o desenvolvimento físico e psíquico">Atividades que estimulam o desenvolvimento físico e psíquico</option>`;
+            } else if (promocao === "Apoio as Comunidades Rurais") {
+              options = `
+                  <option value="Cidadania rural">Cidadania rural</option>`;
+            } else if (promocao === "Educação") {
+              options = `
+                  <option value="Educação de Jovens e Adultos">Educação de Jovens e Adultos</option>
+                  <option value="Educação ambiental">Educação ambiental</option>
+                  <option value="Educação financeira">Educação financeira</option>
+                  <option value="Sucessão Rural">Sucessão Rural</option>`;
+            } else {
+              // Se não houver seleção válida, esconder o select de detalhes
+              detalhesSelect.style.display = "none";
+              return;
+            }
+    
+            // Atualizar as opções do select de detalhes e mostrá-lo
+            detalhesSelect.innerHTML = options;
+            detalhesSelect.style.display = "block";
+          });
+    
+        document
+          .getElementById("formacao")
+          .addEventListener("change", function () {
+            var formacao = this.value;
+            var detalhesSelect = document.getElementById("detalhesFormacao");
+            var options = "";
+    
+            if (formacao === "Sistema de Produção Agropecuário") {
+              options = `
+                  <option value="Produção vegetal">Produção vegetal</option>
+                  <option value="Produção animal">Produção animal</option>
+                  <option value="Produção orgânica">Produção orgânica</option>
+                  <option value="Boas práticas agropecuárias">Boas práticas agropecuárias</option>
+                  <option value="Manejo sanitário">Manejo sanitário</option>`;
+            } else if (formacao === "Meio Ambiente") {
+              options = `
+                  <option value="Baixa emissão de carbono">Baixa emissão de carbono</option>
+                  <option value="Bioeconomia">Bioeconomia</option>
+                  <option value="Bioinsumos">Bioinsumos</option>
+                  <option value="Agricultura e pecuária regenerativa">Agricultura e pecuária regenerativa</option>
+                  <option value="Técnicas de retenção e infiltração de água no solo">Técnicas de retenção e infiltração de água no solo</option>
+                  <option value="Compostagem e enriquecimento de dejetos animais">Compostagem e enriquecimento de dejetos animais</option>`;
+            } else if (formacao === "Agricultura Digital") {
+              options = `
+                  <option value="Agricultura e pecuária de precisão">Agricultura e pecuária de precisão</option>
+                  <option value="Tecnologias em máquinas agrícolas">Tecnologias em máquinas agrícolas</option>
+                  <option value="Drones">Drones</option>
+                  <option value="Geotecnologias">Geotecnologias</option>
+                  <option value="Inteligência artificial">Inteligência artificial</option>`;
+            } else if (formacao === "Saúde e Segurança no Trabalho Rural") {
+              options = `
+                  <option value="Ergonomia">Ergonomia</option>
+                  <option value="Equipamentos de proteção individual (EPI) no trabalho rural">Equipamentos de proteção individual (EPI) no trabalho rural</option>
+                  <option value="Uso correto e seguro de defensivos agrícolas">Uso correto e seguro de defensivos agrícolas</option>
+                  <option value="Segurança no trabalho em máquinas, equipamentos e implementos">Segurança no trabalho em máquinas, equipamentos e implementos</option>
+                  <option value="Normativa NR-31">Normativa NR-31</option>`;
+            } else {
+              // Se não houver seleção válida, esconder o select de detalhes
+              detalhesSelect.style.display = "none";
+              return;
+            }
+    
+            // Atualizar as opções do select de detalhes e mostrá-lo
+            detalhesSelect.innerHTML = options;
+            detalhesSelect.style.display = "block";
+          });
+    
+        // Evento para exibir nome do arquivo PDF selecionado
+        document
+          .getElementById("pdfUpload")
+          .addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            if (!file) {
+              document.getElementById("pdf-file-name").textContent = "";
+              return;
+            }
+            const fileName = file.name;
+            const truncatedFileName =
+              fileName.length > 20 ? fileName.substring(0, 17) + "..." : fileName;
+            document.getElementById("pdf-file-name").textContent =
+              truncatedFileName;
+          });
+    
+        // Manipulação do envio do formulário
+        document.querySelector("form").addEventListener("submit", function (e) {
+          console.log('Form submit handler called');
+          e.preventDefault();
+          var form = this;
+          var formData = new FormData(form);
+    
+          if (!document.getElementById("videoUrl").value) {
+            Swal.fire({
+              icon: "error",
+              title: "Erro ao enviar",
+              text: "Por favor, faça o upload do vídeo antes de enviar o formulário.",
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "OK",
+            });
+            return;
+          }
+    
+          // Verificar se todos os campos requeridos estão preenchidos
+          var allFilled = true;
+          form.querySelectorAll("[required]").forEach(function (element) {
+            if (!element.value) {
+              allFilled = false;
+            }
+          });
+    
+          if (!allFilled) {
+            Swal.fire({
+              icon: "error",
+              title: "Erro ao enviar",
+              text: "Por favor, preencha todos os campos obrigatórios.",
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "OK",
+            });
+            return;
+          }
+  
+          // Mostrar SweetAlert de carregamento
           Swal.fire({
             title: "Enviando...",
             text: "Por favor, aguarde enquanto os dados estão sendo enviados.",
@@ -912,44 +862,35 @@
               Swal.showLoading();
             },
           });
-
+    
           fetch("/", {
             method: "POST",
             body: formData,
           })
-            .then((response) => response.json())
-            .then((data) => {
-              Swal.close();
-              if (data.message) {
-                Swal.fire(
-                  "Sucesso!",
-                  data.message, // Mostra a mensagem de sucesso do servidor
-                  "success"
-                ).then((result) => {
-                  if (result.isConfirmed) {
-                    form.reset(); // Reseta o formulário após sucesso
-                  }
-                });
-              } else {
-                Swal.fire(
-                  "Erro!",
-                  data.error ||
-                    "Houve um erro ao enviar o formulário. Tente novamente!",
-                  "error"
-                );
+            .then(response => {
+              if (!response.ok) {
+                return response.json().then(errorData => { throw errorData; });
               }
+              return response.json();
             })
-            .catch((error) => {
-              Swal.close();
-              console.error("Error:", error);
+            .then(data => {
+              Swal.fire("Sucesso!", data.message, "success").then((result) => {
+                if (result.isConfirmed) {
+                  form.reset();
+                }
+              });
+            })
+            .catch(errorData => {
               Swal.fire(
                 "Erro!",
-                "Houve um problema com a rede ou o servidor. Tente novamente!",
+                errorData.error || "Houve um erro ao enviar o formulário. Tente novamente!",
                 "error"
               );
             });
-        }
+          
+        });
       });
     </script>
+    
   </body>
 </html>

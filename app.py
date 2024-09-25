@@ -73,34 +73,21 @@ with app.app_context():
 def index():
     if request.method == "POST":
         form_data = request.form.to_dict()
-        video_file = request.files.get("videoUpload")
+        video_url = request.form.get("videoUrl")
         pdf_file = request.files.get("pdfUpload")
         email = request.form.get("email")
         responsavel = request.form.get("nome")
 
-        if not video_file:
-            return jsonify({"error": "Arquivo de vídeo é obrigatório."}), 400
-        if not video_file.filename.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
-            return (
-                jsonify(
-                    {"error": "Formato de vídeo inválido. Use: .mp4, .avi, .mov, .mkv."}
-                ),
-                400,
-            )
+        if not video_url:
+            return jsonify({"error": "O link do vídeo é obrigatório."}), 400
 
         try:
-            # Upload do vídeo sem restrições de qualidade ou transformações
-            upload_result_video = cloudinary.uploader.upload(
-                video_file, resource_type="video", folder="video_uploads"
-            )
-            link_video = upload_result_video.get("url")
+            link_video = video_url  # A URL já foi obtida do frontend
 
             link_pdf = None
-            if (
-                pdf_file and pdf_file.filename != ""
-            ):  # Verifica se um arquivo PDF foi realmente enviado
+            if pdf_file and pdf_file.filename != "":
                 upload_result_pdf = cloudinary.uploader.upload(
-                    pdf_file.read(),  # Lê o conteúdo do arquivo
+                    pdf_file.read(),
                     resource_type="raw",
                     folder="pdf_uploads",
                 )
@@ -147,8 +134,6 @@ def index():
                 }
             )
 
-        except cloudinary.exceptions.Error as cloudinary_error:
-            return jsonify({"error": f"Erro no upload: {str(cloudinary_error)}"}), 500
         except Exception as e:
             return jsonify({"error": f"Erro no processamento: {str(e)}"}), 500
 
