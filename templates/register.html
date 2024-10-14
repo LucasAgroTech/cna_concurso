@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Criar Usuário</title>
+  </head>
+  <body>
+    <h1>Criar Usuário</h1>
+    {% if error %}
+    <p style="color: red">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+      <label>Nome de usuário:</label><br />
+      <input type="text" name="username" required /><br />
+      <label>Senha:</label><br />
+      <input type="password" name="password" required /><br />
+      <label>Estado:</label><br />
+      <input type="text" name="estado" required /><br />
+      <label>Administrador:</label>
+      <input type="checkbox" name="is_admin" /><br /><br />
+      <button type="submit">Criar Usuário</button>
+    </form>
+    <a href="{{ url_for('list_users') }}">Voltar à lista de usuários</a>
+  </body>
+</html>

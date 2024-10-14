@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lista de Usuários</title>
+  </head>
+  <body>
+    <h1>Usuários</h1>
+    <a href="{{ url_for('register') }}">Criar Novo Usuário</a>
+    <table border="1">
+      <tr>
+        <th>ID</th>
+        <th>Nome de Usuário</th>
+        <th>Estado</th>
+        <th>Administrador</th>
+        <th>Ações</th>
+      </tr>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.estado }}</td>
+        <td>{{ 'Sim' if user.is_admin else 'Não' }}</td>
+        <td>
+          {% if user.id != current_user.id %}
+          <form
+            action="{{ url_for('delete_user', user_id=user.id) }}"
+            method="post"
+            style="display: inline"
+          >
+            <button
+              type="submit"
+              onclick="return confirm('Tem certeza que deseja excluir este usuário?');"
+            >
+              Excluir
+            </button>
+          </form>
+          {% else %}
+          <!-- Não permitir que o usuário exclua a si mesmo -->
+          Não é possível excluir {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <a href="{{ url_for('listar_inscricoes') }}">Voltar às inscrições</a>
+  </body>
+</html>

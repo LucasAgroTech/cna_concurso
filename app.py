@@ -1,7 +1,19 @@
-from flask import Flask, request, jsonify, render_template, send_file
+from flask import Flask, render_template, redirect, url_for, request, send_file, jsonify
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import (
+    LoginManager,
+    login_user,
+    login_required,
+    logout_user,
+    current_user,
+    UserMixin,
+)
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from sqlalchemy import func
+from flask_migrate import Migrate
 from datetime import datetime
 import pandas as pd
 import pytz
@@ -11,10 +23,13 @@ import requests
 import json
 import random
 import io
+from functools import wraps
+
 
 app = Flask(__name__)
 app.secret_key = "uma_chave_secreta_muito_segura"
 app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024 * 1024
+
 
 uri = os.getenv("DATABASE_URL", "sqlite:///local.db")
 if uri.startswith("postgres://"):
@@ -39,6 +54,13 @@ app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
 mail = Mail(app)
 
 db = SQLAlchemy(app)
+
+migrate = Migrate(app, db)
+
+# Após a configuração do aplicativo
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
 
 class FormEntry(db.Model):
@@ -65,8 +87,326 @@ class FormEntry(db.Model):
     data_envio = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
 
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), nullable=False, unique=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    estado = db.Column(db.String(32), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)  # Novo campo
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+@app.route("/download_avaliacoes")
+@login_required
+def download_avaliacoes():
+    # Realizando o join entre AvaliacaoEntry e FormEntry para obter dados completos
+    avaliacoes = (
+        db.session.query(AvaliacaoEntry, FormEntry)
+        .join(FormEntry, AvaliacaoEntry.form_entry_id == FormEntry.id)
+        .all()
+    )
+
+    # Preparando os dados para o DataFrame
+    data = [
+        {
+            "ID Avaliação": avaliacao.id,
+            "Nome Avaliador": avaliacao.nome_avaliador,
+            "ID Inscrição": inscricao.id,
+            "Nome Inscrito": inscricao.nome,
+            "Postura": avaliacao.nota_postura,
+            "Conteúdo": avaliacao.nota_conteudo,
+            "Imagens": avaliacao.nota_imagens,
+            "Áudio": avaliacao.nota_audio,
+            "Criatividade": avaliacao.nota_criatividade,
+            "Pertinência": avaliacao.nota_pertinencia,
+            "Contextualização": avaliacao.nota_contextualizacao,
+            "Gráficos": avaliacao.nota_graficos,
+            "Data Avaliação": avaliacao.data_avaliacao.strftime("%d/%m/%Y %H:%M"),
+        }
+        for avaliacao, inscricao in avaliacoes
+    ]
+
+    # Criando o DataFrame com os dados das avaliações
+    df = pd.DataFrame(data)
+
+    # Criando um arquivo Excel em memória
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Avaliacoes")
+    output.seek(0)
+
+    # Enviando o arquivo Excel como download
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="avaliacoes.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+class AvaliacaoEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    form_entry_id = db.Column(
+        db.Integer, db.ForeignKey("form_entry.id"), nullable=False
+    )
+    nome_avaliador = db.Column(db.String(100), nullable=False)
+    nota_postura = db.Column(db.Integer, nullable=False)
+    nota_conteudo = db.Column(db.Integer, nullable=False)
+    nota_imagens = db.Column(db.Integer, nullable=False)
+    nota_audio = db.Column(db.Integer, nullable=False)
+    nota_criatividade = db.Column(db.Integer, nullable=False)
+    nota_pertinencia = db.Column(db.Integer, nullable=False)
+    nota_contextualizacao = db.Column(db.Integer, nullable=False)
+    nota_graficos = db.Column(db.Integer, nullable=False)
+    data_avaliacao = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relacionamento com FormEntry
+    form_entry = db.relationship(
+        "FormEntry", backref=db.backref("avaliacoes", lazy=True)
+    )
+
+
 with app.app_context():
     db.create_all()
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+
+@app.route("/public/users", methods=["GET"])
+def public_users():
+    users = User.query.all()
+    users_data = [
+        {
+            "id": user.id,
+            "username": user.username,
+            "estado": user.estado,
+            "is_admin": user.is_admin,
+            # "password_hash": user.password_hash  # Descomente se quiser ver o hash
+        }
+        for user in users
+    ]
+    return jsonify(users_data)
+
+
+from functools import wraps
+
+
+def public_register_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        secret = request.args.get("secret")
+        if not secret or secret != os.getenv("PUBLIC_REGISTER_SECRET"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+@app.route("/avaliacoes", methods=["GET"])
+@login_required
+def ver_todas_avaliacoes():
+    avaliacoes = (
+        db.session.query(AvaliacaoEntry, FormEntry)
+        .join(FormEntry, AvaliacaoEntry.form_entry_id == FormEntry.id)
+        .all()
+    )
+
+    return render_template("todas_avaliacoes.html", avaliacoes=avaliacoes)
+
+
+@app.route("/inscricoes/<int:inscricao_id>/deletar", methods=["POST"])
+@login_required
+def deletar_inscricao(inscricao_id):
+    inscricao = FormEntry.query.get_or_404(inscricao_id)
+    if not current_user.is_admin and inscricao.area != current_user.area:
+        return "Acesso negado", 403
+    db.session.delete(inscricao)
+    db.session.commit()
+    return redirect(url_for("gerenciar_inscricoes"))
+
+
+@app.route("/delete_user/<int:user_id>", methods=["POST"])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_admin:
+        return "Acesso negado", 403
+
+    user = User.query.get_or_404(user_id)
+
+    if user.id == current_user.id:
+        return "Você não pode excluir seu próprio usuário.", 400
+
+    db.session.delete(user)
+    db.session.commit()
+    return redirect(url_for("list_users"))
+
+
+@app.route("/public/register", methods=["GET", "POST"])
+def public_register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        estado = request.form.get("estado")
+        is_admin = True if request.form.get("is_admin") == "on" else False
+
+        # Verificar se o usuário já existe
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return render_template("public_register.html")
+
+        # Criar novo usuário
+        new_user = User(username=username, estado=estado, is_admin=is_admin)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return redirect(url_for("login"))
+
+    return render_template("public_register.html")
+
+
+@app.route("/referenciar/<int:entry_id>", methods=["POST"])
+@login_required
+def referenciar_inscricao(entry_id):
+    inscricao = FormEntry.query.get_or_404(entry_id)
+
+    # Verificação de permissão (opcional)
+    if not current_user.is_admin and inscricao.estado != current_user.estado:
+        return "Acesso negado", 403
+
+    # Obtenção dos dados do formulário
+    referencia = request.form.get("referencia")
+    novo_dado = request.form.get("novo_dado")
+
+    # Validação básica (adapte conforme necessário)
+    if not referencia:
+        # Você pode adicionar mensagens de erro ou redirecionar com mensagens
+        return "Referência é obrigatória", 400
+
+    # Atualização dos campos conforme necessário
+    inscricao.referencia_video = referencia  # Exemplo de atualização
+    if novo_dado:
+        inscricao.assistencia_detail = novo_dado  # Exemplo de atualização
+
+    # Commit das alterações no banco de dados
+    db.session.commit()
+
+    # Redireciona de volta para a lista de inscrições com uma mensagem de sucesso
+    return redirect(url_for("listar_inscricoes"))
+
+
+@app.route("/avaliacao/<int:entry_id>", methods=["POST"])
+@login_required
+def salvar_avaliacao(entry_id):
+    form_entry = FormEntry.query.get_or_404(entry_id)
+
+    # Obtenção dos dados do formulário de avaliação
+    nome_avaliador = request.form.get("nome_avaliador")
+    nota_postura = int(request.form.get("nota_postura"))
+    nota_conteudo = int(request.form.get("nota_conteudo"))
+    nota_imagens = int(request.form.get("nota_imagens"))
+    nota_audio = int(request.form.get("nota_audio"))
+    nota_criatividade = int(request.form.get("nota_criatividade"))
+    nota_pertinencia = int(request.form.get("nota_pertinencia"))
+    nota_contextualizacao = int(request.form.get("nota_contextualizacao"))
+    nota_graficos = int(request.form.get("nota_graficos"))
+
+    # Criação de uma nova avaliação
+    avaliacao = AvaliacaoEntry(
+        form_entry_id=entry_id,
+        nome_avaliador=nome_avaliador,
+        nota_postura=nota_postura,
+        nota_conteudo=nota_conteudo,
+        nota_imagens=nota_imagens,
+        nota_audio=nota_audio,
+        nota_criatividade=nota_criatividade,
+        nota_pertinencia=nota_pertinencia,
+        nota_contextualizacao=nota_contextualizacao,
+        nota_graficos=nota_graficos,
+    )
+
+    # Salvar no banco de dados
+    db.session.add(avaliacao)
+    db.session.commit()
+
+    return redirect(url_for("listar_inscricoes"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        print(
+            f"Tentativa de login com username: {username}"
+        )  # Log de tentativa de login
+
+        user = User.query.filter_by(username=username).first()
+
+        if not user:
+            print("Usuário não encontrado.")  # Log de usuário não encontrado
+        elif not user.check_password(password):
+            print("Senha inválida.")  # Log de senha inválida
+        else:
+            login_user(user)
+            print(f"Usuário {username} logado com sucesso.")  # Log de sucesso
+            return redirect(url_for("listar_inscricoes"))
+
+        return render_template("login.html", error="Usuário ou senha inválidos")
+
+    return render_template("login.html")
+
+
+@app.route("/inscricoes", methods=["GET"])
+@login_required
+def listar_inscricoes():
+    if current_user.is_admin:
+        inscricoes = FormEntry.query.all()
+    else:
+        inscricoes = FormEntry.query.filter_by(estado=current_user.estado).all()
+    return render_template("listar_inscricoes.html", inscricoes=inscricoes)
+
+
+@app.route("/register", methods=["GET", "POST"])
+@login_required
+def register():
+    if not current_user.is_admin:
+        return "Acesso negado", 403
+
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        estado = request.form["estado"]
+        is_admin = "is_admin" in request.form  # Checkbox no formulário
+
+        if User.query.filter_by(username=username).first():
+            return render_template("register.html", error="Usuário já existe")
+
+        new_user = User(username=username, estado=estado, is_admin=is_admin)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for("list_users"))
+    return render_template("register.html")
+
+
+@app.route("/users", methods=["GET"])
+@login_required
+def list_users():
+    if not current_user.is_admin:
+        return "Acesso negado", 403
+
+    users = User.query.all()
+    return render_template("users.html", users=users)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -190,6 +530,13 @@ def download():
         download_name="entries.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
 
 
 @app.route("/entries")

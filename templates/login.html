@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICNA | PRÊMIO CNA DE INOVAÇÃO 2024 - ALYSSON PAOLINELLI</title>
+    <link rel="icon" href="static/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Roboto", sans-serif;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #f0f2f5;
+      }
+      .login-container {
+        background: #fff;
+        padding: 2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+      }
+      .logo {
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+      }
+      .error-message {
+        color: red;
+        margin-bottom: 1rem;
+      }
+      label {
+        display: block;
+        text-align: left;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        color: #555;
+      }
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      button {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #005047;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      button:hover {
+        background-color: #01352f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="logo">
+        <!-- Substitua pelo caminho da sua logo -->
+        <img
+          src="static/logo.png"
+          alt="Logo"
+          width="100%"
+          style="border-radius: 10px 10px 0 0"
+        />
+      </div>
+      <h1>Login</h1>
+      {% if error %}
+      <p class="error-message">{{ error }}</p>
+      {% endif %}
+      <form method="post">
+        <label for="username">Nome de usuário:</label>
+        <input type="text" id="username" name="username" required />
+        <label for="password">Senha:</label>
+        <input type="password" id="password" name="password" required />
+        <button type="submit">Entrar</button>
+      </form>
+    </div>
+  </body>
+</html>
