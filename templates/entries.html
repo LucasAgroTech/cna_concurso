@@ -19,9 +19,10 @@
             <th>Nome</th>
             <th>Estado</th>
             <th>Telefone</th>
-            <th>Tema</th>
             <th>Referência Vídeo</th>
             <th>Link do Arquivo</th>
+            <th>Ações</th>
+            <!-- Nova coluna -->
           </tr>
         </thead>
         <tbody>
@@ -31,10 +32,23 @@
             <td>{{ entry.nome }}</td>
             <td>{{ entry.estado }}</td>
             <td>{{ entry.telefone }}</td>
-            <td>{{ entry.tema }}</td>
             <td>{{ entry.referencia_video }}</td>
             <td>
               <a href="{{ entry.link_arquivo }}" target="_blank">Ver Vídeo</a>
+            </td>
+            <td>
+              <form
+                method="POST"
+                action="{{ url_for('deletar_inscricao', inscricao_id=entry.id) }}"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-danger btn-sm"
+                  onclick="return confirm('Tem certeza que deseja excluir?')"
+                >
+                  Excluir
+                </button>
+              </form>
             </td>
           </tr>
           {% endfor %}

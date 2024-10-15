@@ -118,15 +118,19 @@
           <h2>5º CONCURSO DE VÍDEOS EDUCATIVOS DO SENAR</h2>
         </div>
         <div>Estado: {{ current_user.estado }}</div>
+        <form action="{{ url_for('logout') }}" method="post">
+          <button type="submit" class="btn btn-danger">Logout</button>
+        </form>
       </header>
       <table class="table table-bordered">
         <thead class="thead-light">
           <tr>
             <th>ID</th>
             <th>Nome</th>
+            <th>CPF</th>
+            <th>Referência</th>
+            <th>Categoria</th>
             <th>Vídeo</th>
-            <th>Telefone</th>
-            <th>Estado</th>
             <th class="text-center">Ações</th>
           </tr>
         </thead>
@@ -135,20 +139,29 @@
           <tr>
             <td>{{ inscricao.id }}</td>
             <td>{{ inscricao.nome }}</td>
+            <td>{{ inscricao.cpf }}</td>
+            <td>{{ inscricao.referencia_video }}</td>
+            <td>
+              {{ inscricao.formacao or inscricao.promocao or
+              inscricao.assistencia or "Não informado" }}
+            </td>
             <td>
               <a href="{{ inscricao.link_arquivo }}" target="_blank"
-                >Ver vídeo</a
+                >Assistir</a
               >
             </td>
-            <td>{{ inscricao.telefone }}</td>
-            <td>{{ inscricao.estado }}</td>
             <td class="text-center">
+              {% set ja_avaliou = False %} {% for avaliacao in
+              inscricao.avaliacoes %} {% if avaliacao.nome_avaliador ==
+              current_user.username %} {% set ja_avaliou = True %} {% endif %}
+              {% endfor %}
+
               <button
                 type="button"
-                class="btn btn-primary open-modal"
+                class="btn {{ 'btn-success' if ja_avaliou else 'btn-primary' }} open-modal"
                 data-id="{{ inscricao.id }}"
               >
-                Avaliar
+                {{ 'Avaliado' if ja_avaliou else 'Avaliar' }}
               </button>
             </td>
           </tr>
@@ -197,7 +210,7 @@
                   class="form-control"
                   id="nome_avaliador{{ inscricao.id }}"
                   name="nome_avaliador"
-                  placeholder="Digite o nome do avaliador"
+                  value="{{ current_user.username }}"
                   required
                 />
               </div>

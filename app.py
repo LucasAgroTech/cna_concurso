@@ -226,11 +226,19 @@ def ver_todas_avaliacoes():
 @login_required
 def deletar_inscricao(inscricao_id):
     inscricao = FormEntry.query.get_or_404(inscricao_id)
-    if not current_user.is_admin and inscricao.area != current_user.area:
+
+    # Verificar permissões
+    if not current_user.is_admin and inscricao.estado != current_user.estado:
         return "Acesso negado", 403
+
+    # Excluir as avaliações relacionadas
+    AvaliacaoEntry.query.filter_by(form_entry_id=inscricao.id).delete()
+
+    # Excluir a inscrição
     db.session.delete(inscricao)
     db.session.commit()
-    return redirect(url_for("gerenciar_inscricoes"))
+
+    return redirect(url_for("listar_inscricoes"))
 
 
 @app.route("/delete_user/<int:user_id>", methods=["POST"])
@@ -532,7 +540,7 @@ def download():
     )
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET", "POST"])
 @login_required
 def logout():
     logout_user()
