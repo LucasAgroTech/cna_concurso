@@ -354,19 +354,17 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        print(
-            f"Tentativa de login com username: {username}"
-        )  # Log de tentativa de login
+        print(f"Tentativa de login com username: {username}")
 
         user = User.query.filter_by(username=username).first()
 
         if not user:
-            print("Usuário não encontrado.")  # Log de usuário não encontrado
+            print("Usuário não encontrado.")
         elif not user.check_password(password):
-            print("Senha inválida.")  # Log de senha inválida
+            print("Senha inválida.")
         else:
             login_user(user)
-            print(f"Usuário {username} logado com sucesso.")  # Log de sucesso
+            print(f"Usuário {username} logado com sucesso.")
             return redirect(url_for("listar_inscricoes"))
 
         return render_template("login.html", error="Usuário ou senha inválidos")
@@ -381,6 +379,13 @@ def listar_inscricoes():
         inscricoes = FormEntry.query.all()
     else:
         inscricoes = FormEntry.query.filter_by(estado=current_user.estado).all()
+
+    for inscricao in inscricoes:
+        inscricao.ja_avaliou = any(
+            avaliacao.nome_avaliador == current_user.username
+            for avaliacao in inscricao.avaliacoes
+        )
+
     return render_template("listar_inscricoes.html", inscricoes=inscricoes)
 
 

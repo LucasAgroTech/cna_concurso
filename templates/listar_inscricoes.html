@@ -151,17 +151,12 @@
               >
             </td>
             <td class="text-center">
-              {% set ja_avaliou = False %} {% for avaliacao in
-              inscricao.avaliacoes %} {% if avaliacao.nome_avaliador ==
-              current_user.username %} {% set ja_avaliou = True %} {% endif %}
-              {% endfor %}
-
               <button
                 type="button"
-                class="btn {{ 'btn-success' if ja_avaliou else 'btn-primary' }} open-modal"
+                class="btn {{ 'btn-success' if inscricao.ja_avaliou else 'btn-primary' }} open-modal"
                 data-id="{{ inscricao.id }}"
               >
-                {{ 'Avaliado' if ja_avaliou else 'Avaliar' }}
+                {{ 'Avaliado' if inscricao.ja_avaliou else 'Avaliar' }}
               </button>
             </td>
           </tr>
