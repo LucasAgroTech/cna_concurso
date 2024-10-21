@@ -25,6 +25,40 @@
         margin-top: 30px;
         border-radius: 20px 20px 0 0;
       }
+      /* Estilização do select */
+      .form-group select {
+        padding: 10px 15px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        appearance: none; /* Remove a seta padrão */
+        background-color: #fff;
+        background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23333" d="M6 9.4L1.2 4.6 2.6 3.2 6 6.6 9.4 3.2 10.8 4.6z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 12px;
+        cursor: pointer;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        width: 100%;
+      }
+
+      /* Estilização do select quando está focado */
+      .form-group select:focus {
+        border-color: #66afe9;
+        outline: none;
+        box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
+      }
+
+      /* Estilização do select quando há erro (opcional) */
+      .form-group select.error {
+        border-color: #e74c3c;
+        box-shadow: 0 0 5px rgba(231, 76, 60, 0.6);
+      }
+
+      /* Estilização das opções */
+      .form-group select option {
+        padding: 10px;
+      }
 
       .header-logo {
         display: flex;
@@ -209,7 +243,16 @@
                   readonly
                 />
               </div>
-
+              <div class="form-group">
+                <label for="regional_check"
+                  >É credenciado (a) na regional?</label
+                >
+                <select name="regional_check" id="regional_check">
+                  <option value="" selected>-- Selecione --</option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+              </div>
               <!-- Grupo de Postura -->
               <div class="form-group">
                 <label>

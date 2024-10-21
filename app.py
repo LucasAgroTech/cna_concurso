@@ -126,6 +126,7 @@ def download_avaliacoes():
             "Pertinência": avaliacao.nota_pertinencia,
             "Contextualização": avaliacao.nota_contextualizacao,
             "Gráficos": avaliacao.nota_graficos,
+            "É da Regional?": avaliacao.regional_check,
             "Data Avaliação": avaliacao.data_avaliacao.strftime("%d/%m/%Y %H:%M"),
         }
         for avaliacao, inscricao in avaliacoes
@@ -164,6 +165,7 @@ class AvaliacaoEntry(db.Model):
     nota_contextualizacao = db.Column(db.Integer, nullable=False)
     nota_graficos = db.Column(db.Integer, nullable=False)
     data_avaliacao = db.Column(db.DateTime, default=datetime.utcnow)
+    regional_check = db.Column(db.String(3), nullable=True)
 
     # Relacionamento com FormEntry
     form_entry = db.relationship(
@@ -326,6 +328,7 @@ def salvar_avaliacao(entry_id):
     nota_pertinencia = int(request.form.get("nota_pertinencia"))
     nota_contextualizacao = int(request.form.get("nota_contextualizacao"))
     nota_graficos = int(request.form.get("nota_graficos"))
+    regional_check = request.form.get("regional_check")
 
     # Criação de uma nova avaliação
     avaliacao = AvaliacaoEntry(
@@ -339,6 +342,7 @@ def salvar_avaliacao(entry_id):
         nota_pertinencia=nota_pertinencia,
         nota_contextualizacao=nota_contextualizacao,
         nota_graficos=nota_graficos,
+        regional_check=regional_check,
     )
 
     # Salvar no banco de dados
